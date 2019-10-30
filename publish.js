@@ -44,16 +44,16 @@ const newversion = process.argv[2];
 if (!newversion) {
     console.error("New version not set");
     console.error("Dry run");
+} else {
+    console.log("--");
+    console.log("Updating versions");
+
+    jsdos_json.version = newversion;
+    createdosbox_json.version = newversion;
+
+    fs.writeFileSync(jsdos_package, JSON.stringify(jsdos_json, null, 2));
+    fs.writeFileSync(createdosbox_package, JSON.stringify(createdosbox_json, null, 2));
 }
-
-console.log("--");
-console.log("Updating versions");
-
-jsdos_json.version = newversion;
-createdosbox_json.version = newversion;
-
-fs.writeFileSync(jsdos_package, JSON.stringify(jsdos_json, null, 2));
-fs.writeFileSync(createdosbox_package, JSON.stringify(createdosbox_json, null, 2));
 
 console.log("Updating readme");
 const readme = join(jsdospages, "README.md");
