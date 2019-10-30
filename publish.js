@@ -43,8 +43,7 @@ const newversion = process.argv[2];
 
 if (!newversion) {
     console.error("New version not set");
-    console.error("Usage: nodejs publish.js <version>");
-    process.exit(-1);
+    console.error("Dry run");
 }
 
 console.log("--");
@@ -65,7 +64,7 @@ console.log("--")
 console.log("Publishing js-dos")
 process.chdir(jsdos);
 
-if (jsdos_version == newversion) {
+if (jsdos_version == newversion || !newversion) {
     console.log("Version not changed, skipping...");
 } else {
     console.log("Updating current api");
@@ -86,7 +85,7 @@ console.log("--")
 console.log("Publishing create-dosbox");
 process.chdir(createdosbox);
 
-if (createdosbox_version == newversion) {
+if (createdosbox_version == newversion || !newversion) {
     console.log("Version not changed, skipping...");
 } else {
     console.log("Updating js-dos base");
