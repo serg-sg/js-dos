@@ -65,7 +65,9 @@ console.log("Publishing js-dos")
 process.chdir(jsdos);
 
 if (jsdos_version == newversion || !newversion) {
-    console.log("Version not changed, skipping...");
+    console.log("Version not changed, skipping publishing...");
+    execSync("gulp clean");
+    execSync("gulp");
 } else {
     console.log("Updating current api");
     execSync("gulp clean");
@@ -105,7 +107,7 @@ console.log("--")
 console.log("Publishing js-dos-pages");
 process.chdir(join(jsdos, "dist"));
 
-const zip = join(jsdos, newversion + ".zip");
+const zip = join(jsdos, (newversion || "dryrun") + ".zip");
 fse.removeSync(zip); 
 execSync("zip " + zip + " -r ./*");
 
@@ -113,11 +115,13 @@ const current = join(jsdospages, "6.22", "current");
 fse.removeSync(current); 
 execSync("unzip " + zip + " -d " + current);
 
-process.chdir(jsdospages);
-console.log("Commiting");
-execSync("git commit -am \"publish: " + newversion + "\"");
+if (newversion) {
+    process.chdir(jsdospages);
+    console.log("Commiting");
+    execSync("git commit -am \"publish: " + newversion + "\"");
 
-console.log("Pushing");
-execSync("git push origin gh-pages");
+    console.log("Pushing");
+    execSync("git push origin gh-pages");
 
-console.log("Do not forget to upload '" + zip + "' to github!");
+    console.log("Do not forget to upload '" + zip + "' to github!");
+}
