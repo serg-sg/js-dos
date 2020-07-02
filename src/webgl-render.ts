@@ -24,6 +24,7 @@ void main(void) {
 `;
 
 export function bindCanvasToCi(canvas: HTMLCanvasElement, ci: CommandInterface) {
+    canvas.style.imageRendering = "crisp-edges";
     const gl = canvas.getContext("webgl");
     if (gl === null) {
         throw new Error("Unable to create webgl context on given canvas");
@@ -32,14 +33,9 @@ export function bindCanvasToCi(canvas: HTMLCanvasElement, ci: CommandInterface) 
     const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
     const vertexPosition = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
     const textureCoord = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
-    //const projectionMatrix = gl.getUniformLocation(shaderProgram, 'uProjectionMatrix');
-    //const modelViewMatrix = gl.getUniformLocation(shaderProgram, 'uModelViewMatrix');
     const uSampler = gl.getUniformLocation(shaderProgram, 'uSampler');
 
     initBuffers(gl, vertexPosition, textureCoord);
-
-    let width = 320;
-    let height = 200;
 
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -57,17 +53,27 @@ export function bindCanvasToCi(canvas: HTMLCanvasElement, ci: CommandInterface) 
     gl.activeTexture(gl.TEXTURE0);
     gl.uniform1i(uSampler, 0);
 
-    ci.events().onFrameSize((w, h) => {
+    let width = 0;
+    let height = 0;
+
+    const onResizeFrame = (w: number, h: number) => {
         width = w;
         height = h;
-    });
+        canvas.width = width;
+        canvas.height = height;
+        gl.viewport(0, 0, width, height);
+    };
 
+    onResizeFrame(ci.width(), ci.height());
+
+    ci.events().onFrameSize(onResizeFrame);
     ci.events().onFrame((rgba) => {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
                       width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE,
                       rgba);
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     });
+
 }
 
 function initShaderProgram(gl: WebGLRenderingContext, vsSource: string, fsSource: string) {
@@ -103,10 +109,10 @@ function initBuffers(gl: WebGLRenderingContext, vertexPosition: number, textureC
   const positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   const positions = [
-    -1.0, -1.0,  1.0,
-     1.0, -1.0,  1.0,
-     1.0,  1.0,  1.0,
-    -1.0,  1.0,  1.0,
+    -1.0, -1.0,  0.0,
+     1.0, -1.0,  0.0,
+     1.0,  1.0,  0.0,
+    -1.0,  1.0,  0.0,
   ];
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
   gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);

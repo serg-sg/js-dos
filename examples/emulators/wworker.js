@@ -1239,11 +1239,11 @@ function updateGlobalBufferAndViews(buf) {
 }
 
 var STATIC_BASE = 1024,
-    STACK_BASE = 27695184,
+    STACK_BASE = 27695248,
     STACKTOP = STACK_BASE,
-    STACK_MAX = 26646608,
-    DYNAMIC_BASE = 27695184,
-    DYNAMICTOP_PTR = 26646448;
+    STACK_MAX = 26646672,
+    DYNAMIC_BASE = 27695248,
+    DYNAMICTOP_PTR = 26646512;
 
 
 
@@ -1671,13 +1671,13 @@ var tempI64;
 
 var ASM_CONSTS = {
   84483: function() {Module['screenIsReadOnly'] = true;},  
- 122808: function() {return 0}
+ 122872: function() {return 0}
 };
 
 function _emscripten_asm_const_iii(code, sigPtr, argbuf) {
   var args = readAsmConstArgs(sigPtr, argbuf);
   return ASM_CONSTS[code].apply(null, args);
-}function ws_init_runtime(){ function sendMessage(name, props) { postMessage({ name, props }); }; Module.sendMessage = sendMessage; Module.ping = function(msg) { }; Module.log = function() { sendMessage("ws-log", { args: Array.prototype.slice.call(arguments) }); }; Module.warn = function() { sendMessage("ws-warn", { args: Array.prototype.slice.call(arguments) }); }; Module.err = function() { sendMessage("ws-err", { args: Array.prototype.slice.call(arguments) }); }; onmessage = function(e) { var data = e.data; if (data.type === "sync_sleep_message") { return; } switch (data.name) { case "wc-run": { Module.bundle = data.props.bundle; Module._extractBundleToFs(); Module._runRuntime(); sendMessage("ws-server-ready"); } break; case "wc-exit": { try { Module._requestExit(); } catch (e) { if (e.name !== "ExitStatus") { throw e; } } } break; case "wc-pack-fs-to-bundle": { try { Module.persist = function(archive) { sendMessage("ws-persist", { bundle: archive }); }; Module._packFsToBundle(); delete Module.persist; } catch (e) { Module.err(e.message); } } break; case "wc-add-key": { Module._addKey(data.props.key, data.props.pressed); } break; default: { console.log("ws " + JSON.stringify(data)); } break; } }; sendMessage("ws-ready"); }
+}function ws_init_runtime(){ function sendMessage(name, props) { postMessage({ name, props }); }; Module.sendMessage = sendMessage; Module.ping = function(msg) { }; Module.log = function() { sendMessage("ws-log", { args: Array.prototype.slice.call(arguments) }); }; Module.warn = function() { sendMessage("ws-warn", { args: Array.prototype.slice.call(arguments) }); }; Module.err = function() { sendMessage("ws-err", { args: Array.prototype.slice.call(arguments) }); }; Module.print = Module.log; Module.printErr = Module.err; onmessage = function(e) { var data = e.data; if (data.type === "sync_sleep_message") { return; } switch (data.name) { case "wc-run": { Module.bundle = data.props.bundle; Module._extractBundleToFs(); Module._runRuntime(); sendMessage("ws-server-ready"); } break; case "wc-exit": { try { Module._requestExit(); } catch (e) { if (e.name !== "ExitStatus") { throw e; } } } break; case "wc-pack-fs-to-bundle": { try { Module.persist = function(archive) { sendMessage("ws-persist", { bundle: archive }); }; Module._packFsToBundle(); delete Module.persist; } catch (e) { Module.err(e.message); } } break; case "wc-add-key": { Module._addKey(data.props.key, data.props.pressed); } break; default: { console.log("ws " + JSON.stringify(data)); } break; } }; sendMessage("ws-ready"); }
 function ws_client_stdout(data,amount){ Module.sendMessage("ws-stdout", { message: UTF8ToString(data, amount) }); }
 function initSyncSleep(worker){ Module.alive = true; Module.sync_id = Date.now(); Module.sync_sleep = function(wakeUp) { if (Module.sync_wakeUp) { throw new Error("Trying to sleep in sleeping state!"); return; } Module.sync_wakeUp = wakeUp; if (worker) { postMessage({type : "sync_sleep_message", id : Module.sync_id}); } else { window.postMessage({type : "sync_sleep_message", id : Module.sync_id}, "*"); } }; Module.receive = function(ev) { var data = ev.data; if (ev.data.type === "sync_sleep_message" && Module.sync_id == ev.data.id) { ev.stopPropagation(); var wakeUp = Module.sync_wakeUp; delete Module.sync_wakeUp; if (Module.alive) { wakeUp(); } } }; if (worker) { self.addEventListener("message", Module.receive, true); } else { window.addEventListener("message", Module.receive, true); } return true; }
 function emsc_ws_exit_runtime(){ Module.exit = function() { Module.sendMessage("ws-exit"); }; }
@@ -1698,7 +1698,7 @@ function emsc_ws_client_frame_set_size(width,height){ Module.sendMessage("ws-fra
 
 
 
-// STATICTOP = STATIC_BASE + 26645584;
+// STATICTOP = STATIC_BASE + 26645648;
 /* global initializers */  __ATINIT__.push({ func: function() { ___wasm_call_ctors() } });
 
 
@@ -5272,7 +5272,7 @@ function emsc_ws_client_frame_set_size(width,height){ Module.sendMessage("ws-fra
     }
 
   function _emscripten_get_sbrk_ptr() {
-      return 26646448;
+      return 26646512;
     }
 
   function _emscripten_memcpy_big(dest, src, num) {
@@ -5483,10 +5483,10 @@ function emsc_ws_client_frame_set_size(width,height){ Module.sendMessage("ws-fra
     }
 
   
-  var ___tm_current=26646464;
+  var ___tm_current=26646528;
   
   
-  var ___tm_timezone=(stringToUTF8("GMT", 26646512, 4), 26646512);
+  var ___tm_timezone=(stringToUTF8("GMT", 26646576, 4), 26646576);
   
   function _tzset() {
       // TODO: Use (malleable) environment variables instead of system settings.
