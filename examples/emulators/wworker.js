@@ -6853,7 +6853,5 @@ if (typeof exports === 'object' && typeof module === 'object')
 
         return;
     }
-
-    console.log("Unknown message: " + JSON.stringify(e));
 };
 

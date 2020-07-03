@@ -1,3 +1,5 @@
+import { domToKeyCode } from "./keys";
+
 var elementResizeDetector = require("element-resize-detector");
 const resizeDetector = elementResizeDetector({
 });
@@ -10,6 +12,8 @@ export class DomLayers {
     height: number;
 
     private onResize: (width: number, height: number) => void;
+    private onKeyDown: (keyCode: number) => void;
+    private onKeyUp: (keyCode: number) => void;
 
 
     constructor(root: HTMLDivElement) {
@@ -26,7 +30,10 @@ export class DomLayers {
 
         this.width = root.offsetWidth;
         this.height = root.offsetHeight;
+
         this.onResize = () => {};
+        this.onKeyDown = () => {};
+        this.onKeyUp = () => {};
 
         resizeDetector.listenTo(this.root, (el: HTMLElement) => {
             if (el !== root) {
@@ -37,14 +44,36 @@ export class DomLayers {
             this.height = el.offsetHeight;
             this.onResize(this.width, this.height);
         });
+
+        window.addEventListener("keydown", (e) => {
+            const keyCode = domToKeyCode(e.keyCode);
+            this.onKeyDown(keyCode);
+        }, true);
+
+        window.addEventListener("keyup", (e) => {
+            const keyCode = domToKeyCode(e.keyCode);
+            this.onKeyUp(keyCode);
+        }, true);
     }
 
     setOnResize(handler: (width: number, height: number) => void) {
         this.onResize = handler;
     }
 
+    setOnKeyDown(handler: (keyCode: number) => void) {
+        this.onKeyDown = handler;
+    }
+
+    setOnKeyUp(handler: (keyCode: number) => void) {
+        this.onKeyUp = handler;
+    }
+
     hideLoadingLayer() {
         this.loading.style.visibility = "hidden";
+    }
+
+    showLoadingLayer() {
+        this.loading.style.visibility = "visible";
     }
 }
 
