@@ -16,7 +16,12 @@ const tsify = require("tsify");
 
 function clean() {
     return del(["dist/emulators*"], { force: true });
-};
+}
+
+function copyCss() {
+    return src("src/emulators-ui.css")
+        .pipe(dest("dist"));
+}
 
 function js() {
     return browserify({
@@ -45,4 +50,4 @@ function js() {
         .pipe(dest("dist"));
 }
 
-export const emulatorsUi = series(clean, js);
+export const emulatorsUi = series(clean, js, copyCss);

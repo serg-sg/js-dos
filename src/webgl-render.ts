@@ -1,4 +1,5 @@
 import { CommandInterface } from "emulators";
+import { DomLayers } from "./dom";
 
 const vsSource = `
 attribute vec4 aVertexPosition;
@@ -23,8 +24,8 @@ void main(void) {
 }
 `;
 
-export function bindCanvasToCi(canvas: HTMLCanvasElement, ci: CommandInterface) {
-    canvas.style.imageRendering = "crisp-edges";
+export function bindWebGlRenderer(layers: DomLayers, ci: CommandInterface) {
+    const canvas = layers.canvas;
     const gl = canvas.getContext("webgl");
     if (gl === null) {
         throw new Error("Unable to create webgl context on given canvas");
@@ -53,27 +54,53 @@ export function bindCanvasToCi(canvas: HTMLCanvasElement, ci: CommandInterface) 
     gl.activeTexture(gl.TEXTURE0);
     gl.uniform1i(uSampler, 0);
 
-    let width = 0;
-    let height = 0;
+    let containerWidth = layers.width;
+    let containerHeight = layers.height;
+    let frameWidth = 0;
+    let frameHeight = 0;
 
-    const onResizeFrame = (w: number, h: number) => {
-        width = w;
-        height = h;
-        canvas.width = width;
-        canvas.height = height;
-        gl.viewport(0, 0, width, height);
+    const onResize = () => {
+        const aspect = frameWidth / frameHeight;
+
+        let width = containerWidth;
+        let height = containerWidth / aspect;
+
+        if (height > containerHeight) {
+            height = containerHeight;
+            width = containerHeight * aspect;
+        }
+
+        canvas.style.position = "relative";
+        canvas.style.top = (containerHeight - height) / 2 + "px";
+        canvas.style.left = (containerWidth - width) / 2 + "px";
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
     };
 
-    onResizeFrame(ci.width(), ci.height());
+    const onResizeLayer = (w: number, h: number) => {
+        containerWidth = w;
+        containerHeight = h;
+        onResize();
+    }
+    layers.setOnResize(onResizeLayer);
 
+    const onResizeFrame = (w: number, h: number) => {
+        frameWidth = w;
+        frameHeight = h;
+        canvas.width = frameWidth;
+        canvas.height = frameHeight;
+        gl.viewport(0, 0, frameWidth, frameHeight);
+        onResize();
+    };
     ci.events().onFrameSize(onResizeFrame);
     ci.events().onFrame((rgba) => {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
-                      width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+                      frameWidth, frameHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE,
                       rgba);
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     });
 
+    onResizeFrame(ci.width(), ci.height());
 }
 
 function initShaderProgram(gl: WebGLRenderingContext, vsSource: string, fsSource: string) {

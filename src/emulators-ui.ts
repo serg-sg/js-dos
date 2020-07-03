@@ -1,20 +1,35 @@
 import { Emulators, CommandInterface } from "emulators";
 
+import { DomLayers } from "./dom";
 import { resolveBundle } from "./resolve-bundle";
-import { bindCanvasToCi } from "./webgl-render";
+import { bindWebGlRenderer } from "./webgl-render";
+import { Cache } from "emulators/dist/types/cache";
 
 declare var emulators: Emulators;
 
-export async function DosCanvasUi(canvas: HTMLCanvasElement,
-                                  bundleUrl: string,
-                                  emulatorsImpl?: Emulators): Promise<CommandInterface> {
-    const impl = emulatorsImpl || emulators;
-    const cache = await impl.cache();
-    const bundleData: Uint8Array = await resolveBundle(bundleUrl, cache);
-    return impl.dosWorker(bundleData).then((ci) => {
-        bindCanvasToCi(canvas, ci);
-        return ci;
-    });
+export class Emulator {
+    layers: DomLayers;
+
+    constructor(root: HTMLDivElement) {
+        this.layers = new DomLayers(root);
+    }
+
+    async runBundle(bundleUrl: string,
+                    emulatorImpl: (bundle: Uint8Array) => Promise<CommandInterface>,
+                    cacheImpl?: Promise<Cache>): Promise<CommandInterface> {
+        const cache = await (cacheImpl || emulators.cache());
+        const bundleData: Uint8Array = await resolveBundle(bundleUrl, cache);
+        return emulatorImpl.apply(emulators, [bundleData]).then((ci) => {
+            this.layers.hideLoadingLayer();
+            bindWebGlRenderer(this.layers, ci);
+            return ci;
+        });
+    }
+
 }
 
-(window as any).dosCanvasUi = DosCanvasUi;
+export function CreateEmulator(root: HTMLDivElement) {
+    return new Emulator(root);
+}
+
+(window as any).createEmulator = CreateEmulator;

@@ -4,14 +4,15 @@
         <title>Digger Example</title>
         <script src="emulators/emulators.js"></script>
         <script src="emulators-ui/emulators-ui.js"></script>
+        <link rel="stylesheet" href="emulators-ui/emulators-ui.css">
     </head>
 
     <body>
-        <canvas id="canvas" style="width: 640px; height: 400px"></canvas>
+        <div id="root" style="width: 100%; height: 100%;"></div>
         <script>
          emulators.pathPrefix = "emulators/";
-         dosCanvasUi(document.getElementById("canvas"), "bundles/digger.jsdos").then((ci) =>
-             window.ci = ci);
+         const emulator = createEmulator(document.getElementById("root"));
+         emulator.runBundle("bundles/digger.jsdos", emulators.dosWorker);
         </script>
     </body>
 </html>

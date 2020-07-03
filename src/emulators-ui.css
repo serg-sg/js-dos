@@ -1,0 +1,40 @@
+.emulator-root {
+    background: black;
+}
+
+.emulator-canvas {
+    image-rendering: "crisp-edges";
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.emulator-loading {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: black;
+    color: white;
+    font-weight: bold;
+}
+
+.emulator-loading-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.emulator-loading-pre-1 {
+}
+
+.emulator-loading-pre-2 {
+}
