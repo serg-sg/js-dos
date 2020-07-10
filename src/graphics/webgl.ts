@@ -1,5 +1,5 @@
+import { Layers } from "../dom/layers";
 import { CommandInterface } from "emulators";
-import { DomLayers } from "./dom";
 
 const vsSource = `
 attribute vec4 aVertexPosition;
@@ -24,7 +24,7 @@ void main(void) {
 }
 `;
 
-export function bindWebGlRenderer(layers: DomLayers, ci: CommandInterface) {
+export function webGl(layers: Layers, ci: CommandInterface) {
     const canvas = layers.canvas;
     const gl = canvas.getContext("webgl");
     if (gl === null) {
@@ -101,6 +101,10 @@ export function bindWebGlRenderer(layers: DomLayers, ci: CommandInterface) {
     });
 
     onResizeFrame(ci.width(), ci.height());
+
+    ci.events().onExit(() => {
+        layers.setOnResize(() => { /**/ });
+    });
 }
 
 function initShaderProgram(gl: WebGLRenderingContext, vsSource: string, fsSource: string) {

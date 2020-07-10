@@ -1,6 +1,7 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <title>Digger Example</title>
         <script src="emulators/emulators.js"></script>
         <script src="emulators-ui/emulators-ui.js"></script>
@@ -22,17 +23,36 @@
         </div>
         <script>
          emulators.pathPrefix = "emulators/";
-         const emulator = createEmulator(document.getElementById("root"));
 
-         function start() {
+         let ciPromise = null;
+         const layers = emulatorsUi.dom.layers(document.getElementById("root"));
+
+         async function start() {
+             stop();
+
+             layers.showLoadingLayer();
+
              const implName = document.getElementById("impl-select").value;
-             const impl = implName === "dos-worker" ?
-                          emulators.dosWorker : emulators.dosDirect;
-             emulator.runBundle("bundles/digger.jsdos", impl);
+             const bundle = await emulatorsUi.network.resolveBundle("bundles/digger.jsdos");
+
+             if (implName === "dos-worker") {
+                 ciPromise = emulators.dosWorker(bundle);
+             } else {
+                 ciPromise = emulators.dosDirect(bundle);
+             }
+
+             ciPromise.then((ci) => {
+                 emulatorsUi.graphics.webGl(layers, ci);
+                 emulatorsUi.sound.audioNode(ci);
+                 emulatorsUi.controls.keyboard(layers, ci);
+                 layers.hideLoadingLayer();
+             });
          }
 
          function stop() {
-             emulator.ci.then((ci) => ci.exit());
+             if (ciPromise !== null) {
+                 ciPromise.then((ci) => ci.exit());
+             }
          }
         </script>
     </body>

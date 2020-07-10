@@ -1,3 +1,5 @@
+// tslint:disable:variable-name
+
 const KBD_NONE = 0;
 const KBD_0 = 48;
 const KBD_1 = 49;
@@ -164,7 +166,7 @@ const keycodes: {[index: number]: number} = {
     89: KBD_y,
     90: KBD_z,
     // 91: KBD_left_super,
-    //93: KBD_menu,
+    // 93: KBD_menu,
     96: KBD_kp0,
     97: KBD_kp1,
     98: KBD_kp2,
@@ -175,10 +177,10 @@ const keycodes: {[index: number]: number} = {
     103: KBD_kp7,
     104: KBD_kp8,
     105: KBD_kp9,
-    //106: KBD_kpmultiply,
-    //107: KBD_kpadd,
-    //109: KBD_kpsubtract,
-    //110: KBD_kpdecimal,
+    // 106: KBD_kpmultiply,
+    // 107: KBD_kpadd,
+    // 109: KBD_kpsubtract,
+    // 110: KBD_kpdecimal,
     111: KBD_kpdivide,
     112: KBD_f1,
     113: KBD_f2,
@@ -201,7 +203,7 @@ const keycodes: {[index: number]: number} = {
     189: KBD_minus,
     190: KBD_period,
     191: KBD_slash,
-    //192: KBD_graveaccent,
+    // 192: KBD_graveaccent,
     219: KBD_leftbracket,
     220: KBD_backslash,
     221: KBD_rightbracket,

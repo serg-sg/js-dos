@@ -1,6 +1,10 @@
+import { Emulators } from "emulators";
 import { Cache } from "emulators/dist/types/cache";
 
-export function resolveBundle(bundleUrl: string, cache: Cache): Promise<Uint8Array> {
+declare const emulators: Emulators;
+
+export async function resolveBundle(bundleUrl: string, cacheImpl?: Cache): Promise<Uint8Array> {
+    const cache = cacheImpl || (await emulators.cache());
     return cache.get(bundleUrl)
         .catch(() => {
             return new Promise<ArrayBuffer>((resolve, reject) => {

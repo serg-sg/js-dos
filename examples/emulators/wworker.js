@@ -1239,11 +1239,11 @@ function updateGlobalBufferAndViews(buf) {
 }
 
 var STATIC_BASE = 1024,
-    STACK_BASE = 27695248,
+    STACK_BASE = 27695504,
     STACKTOP = STACK_BASE,
-    STACK_MAX = 26646672,
-    DYNAMIC_BASE = 27695248,
-    DYNAMICTOP_PTR = 26646512;
+    STACK_MAX = 26646928,
+    DYNAMIC_BASE = 27695504,
+    DYNAMICTOP_PTR = 26646768;
 
 
 
@@ -1671,7 +1671,7 @@ var tempI64;
 
 var ASM_CONSTS = {
   84483: function() {Module['screenIsReadOnly'] = true;},  
- 122872: function() {return 0}
+ 123128: function() {return 0}
 };
 
 function _emscripten_asm_const_iii(code, sigPtr, argbuf) {
@@ -1679,7 +1679,9 @@ function _emscripten_asm_const_iii(code, sigPtr, argbuf) {
   return ASM_CONSTS[code].apply(null, args);
 }function ws_init_runtime(){ function sendMessage(name, props) { postMessage({ name, props }); }; Module.sendMessage = sendMessage; Module.ping = function(msg) { }; Module.log = function() { sendMessage("ws-log", { args: Array.prototype.slice.call(arguments) }); }; Module.warn = function() { sendMessage("ws-warn", { args: Array.prototype.slice.call(arguments) }); }; Module.err = function() { sendMessage("ws-err", { args: Array.prototype.slice.call(arguments) }); }; Module.print = Module.log; Module.printErr = Module.err; onmessage = function(e) { var data = e.data; if (data.type === "sync_sleep_message") { return; } switch (data.name) { case "wc-run": { Module.bundle = data.props.bundle; Module._extractBundleToFs(); Module._runRuntime(); sendMessage("ws-server-ready"); } break; case "wc-exit": { try { Module._requestExit(); } catch (e) { if (e.name !== "ExitStatus") { throw e; } } } break; case "wc-pack-fs-to-bundle": { try { Module.persist = function(archive) { sendMessage("ws-persist", { bundle: archive }); }; Module._packFsToBundle(); delete Module.persist; } catch (e) { Module.err(e.message); } } break; case "wc-add-key": { Module._addKey(data.props.key, data.props.pressed); } break; default: { console.log("ws " + JSON.stringify(data)); } break; } }; sendMessage("ws-ready"); }
 function ws_client_stdout(data,amount){ Module.sendMessage("ws-stdout", { message: UTF8ToString(data, amount) }); }
+function emsc_ws_client_sound_init(freq){ Module.sendMessage("ws-sound-init", { freq : freq }); }
 function initSyncSleep(worker){ Module.alive = true; Module.sync_id = Date.now(); Module.sync_sleep = function(wakeUp) { if (Module.sync_wakeUp) { throw new Error("Trying to sleep in sleeping state!"); return; } Module.sync_wakeUp = wakeUp; if (worker) { postMessage({type : "sync_sleep_message", id : Module.sync_id}); } else { window.postMessage({type : "sync_sleep_message", id : Module.sync_id}, "*"); } }; Module.receive = function(ev) { var data = ev.data; if (ev.data.type === "sync_sleep_message" && Module.sync_id == ev.data.id) { ev.stopPropagation(); var wakeUp = Module.sync_wakeUp; delete Module.sync_wakeUp; if (Module.alive) { wakeUp(); } } }; if (worker) { self.addEventListener("message", Module.receive, true); } else { window.addEventListener("message", Module.receive, true); } return true; }
+function emsc_ws_client_sound_push(samples,num_samples){ if (num_samples > 0) { Module.sendMessage("ws-sound-push", { samples: Module.HEAPF32.slice(samples / 4, samples / 4 + num_samples) }); } }
 function emsc_ws_exit_runtime(){ Module.exit = function() { Module.sendMessage("ws-exit"); }; }
 function emsc_pack_fs_to_bundle(){ Module.FS.chdir("/home/web_user"); const ptr = Module._zip_from_fs(); if (ptr === 0) { Module.err("Can't create zip, see more info in logs"); Module._abort(); return; } const length = Module.HEAPU32[ptr / 4]; const memory = Module.HEAPU8; const archive = memory.slice(ptr + 4, ptr + 4 + length); Module._free(ptr); Module.persist(archive); }
 function jsdos_error(tag,message){ Module.log("[native:error]", UTF8ToString(tag), UTF8ToString(message)); }
@@ -1698,7 +1700,7 @@ function emsc_ws_client_frame_set_size(width,height){ Module.sendMessage("ws-fra
 
 
 
-// STATICTOP = STATIC_BASE + 26645648;
+// STATICTOP = STATIC_BASE + 26645904;
 /* global initializers */  __ATINIT__.push({ func: function() { ___wasm_call_ctors() } });
 
 
@@ -5272,7 +5274,7 @@ function emsc_ws_client_frame_set_size(width,height){ Module.sendMessage("ws-fra
     }
 
   function _emscripten_get_sbrk_ptr() {
-      return 26646512;
+      return 26646768;
     }
 
   function _emscripten_memcpy_big(dest, src, num) {
@@ -5483,10 +5485,10 @@ function emsc_ws_client_frame_set_size(width,height){ Module.sendMessage("ws-fra
     }
 
   
-  var ___tm_current=26646528;
+  var ___tm_current=26646784;
   
   
-  var ___tm_timezone=(stringToUTF8("GMT", 26646576, 4), 26646576);
+  var ___tm_timezone=(stringToUTF8("GMT", 26646832, 4), 26646832);
   
   function _tzset() {
       // TODO: Use (malleable) environment variables instead of system settings.
@@ -6218,7 +6220,7 @@ function intArrayToString(array) {
 
 
 var asmGlobalArg = {};
-var asmLibraryArg = { "__assert_fail": ___assert_fail, "__cxa_atexit": ___cxa_atexit, "__map_file": ___map_file, "__syscall10": ___syscall10, "__syscall15": ___syscall15, "__syscall183": ___syscall183, "__syscall194": ___syscall194, "__syscall195": ___syscall195, "__syscall197": ___syscall197, "__syscall20": ___syscall20, "__syscall220": ___syscall220, "__syscall221": ___syscall221, "__syscall33": ___syscall33, "__syscall38": ___syscall38, "__syscall39": ___syscall39, "__syscall40": ___syscall40, "__syscall5": ___syscall5, "__syscall54": ___syscall54, "__syscall60": ___syscall60, "__syscall91": ___syscall91, "abort": _abort, "clock_gettime": _clock_gettime, "destroySyncSleep": destroySyncSleep, "emsc_add_frame_line": emsc_add_frame_line, "emsc_end_frame_update": emsc_end_frame_update, "emsc_exit_runtime": emsc_exit_runtime, "emsc_extract_bundle_to_fs": emsc_extract_bundle_to_fs, "emsc_pack_fs_to_bundle": emsc_pack_fs_to_bundle, "emsc_start_frame_update": emsc_start_frame_update, "emsc_ws_client_frame_set_size": emsc_ws_client_frame_set_size, "emsc_ws_exit_runtime": emsc_ws_exit_runtime, "emscripten_asm_const_iii": _emscripten_asm_const_iii, "emscripten_exit_with_live_runtime": _emscripten_exit_with_live_runtime, "emscripten_fetch": _emscripten_fetch, "emscripten_fetch_attr_init": _emscripten_fetch_attr_init, "emscripten_fetch_close": _emscripten_fetch_close, "emscripten_force_exit": _emscripten_force_exit, "emscripten_get_sbrk_ptr": _emscripten_get_sbrk_ptr, "emscripten_memcpy_big": _emscripten_memcpy_big, "emscripten_resize_heap": _emscripten_resize_heap, "environ_get": _environ_get, "environ_sizes_get": _environ_sizes_get, "exit": _exit, "fd_close": _fd_close, "fd_fdstat_get": _fd_fdstat_get, "fd_read": _fd_read, "fd_seek": _fd_seek, "fd_write": _fd_write, "getpwnam": _getpwnam, "gettimeofday": _gettimeofday, "initSyncSleep": initSyncSleep, "isNormalState": isNormalState, "isWorker": isWorker, "jsdos_error": jsdos_error, "jsdos_log": jsdos_log, "jsdos_warn": jsdos_warn, "localtime": _localtime, "memory": wasmMemory, "mktime": _mktime, "setTempRet0": _setTempRet0, "strftime_l": _strftime_l, "syncSleep": syncSleep, "table": wasmTable, "time": _time, "ws_client_stdout": ws_client_stdout, "ws_init_runtime": ws_init_runtime };
+var asmLibraryArg = { "__assert_fail": ___assert_fail, "__cxa_atexit": ___cxa_atexit, "__map_file": ___map_file, "__syscall10": ___syscall10, "__syscall15": ___syscall15, "__syscall183": ___syscall183, "__syscall194": ___syscall194, "__syscall195": ___syscall195, "__syscall197": ___syscall197, "__syscall20": ___syscall20, "__syscall220": ___syscall220, "__syscall221": ___syscall221, "__syscall33": ___syscall33, "__syscall38": ___syscall38, "__syscall39": ___syscall39, "__syscall40": ___syscall40, "__syscall5": ___syscall5, "__syscall54": ___syscall54, "__syscall60": ___syscall60, "__syscall91": ___syscall91, "abort": _abort, "clock_gettime": _clock_gettime, "destroySyncSleep": destroySyncSleep, "emsc_add_frame_line": emsc_add_frame_line, "emsc_end_frame_update": emsc_end_frame_update, "emsc_exit_runtime": emsc_exit_runtime, "emsc_extract_bundle_to_fs": emsc_extract_bundle_to_fs, "emsc_pack_fs_to_bundle": emsc_pack_fs_to_bundle, "emsc_start_frame_update": emsc_start_frame_update, "emsc_ws_client_frame_set_size": emsc_ws_client_frame_set_size, "emsc_ws_client_sound_init": emsc_ws_client_sound_init, "emsc_ws_client_sound_push": emsc_ws_client_sound_push, "emsc_ws_exit_runtime": emsc_ws_exit_runtime, "emscripten_asm_const_iii": _emscripten_asm_const_iii, "emscripten_exit_with_live_runtime": _emscripten_exit_with_live_runtime, "emscripten_fetch": _emscripten_fetch, "emscripten_fetch_attr_init": _emscripten_fetch_attr_init, "emscripten_fetch_close": _emscripten_fetch_close, "emscripten_force_exit": _emscripten_force_exit, "emscripten_get_sbrk_ptr": _emscripten_get_sbrk_ptr, "emscripten_memcpy_big": _emscripten_memcpy_big, "emscripten_resize_heap": _emscripten_resize_heap, "environ_get": _environ_get, "environ_sizes_get": _environ_sizes_get, "exit": _exit, "fd_close": _fd_close, "fd_fdstat_get": _fd_fdstat_get, "fd_read": _fd_read, "fd_seek": _fd_seek, "fd_write": _fd_write, "getpwnam": _getpwnam, "gettimeofday": _gettimeofday, "initSyncSleep": initSyncSleep, "isNormalState": isNormalState, "isWorker": isWorker, "jsdos_error": jsdos_error, "jsdos_log": jsdos_log, "jsdos_warn": jsdos_warn, "localtime": _localtime, "memory": wasmMemory, "mktime": _mktime, "setTempRet0": _setTempRet0, "strftime_l": _strftime_l, "syncSleep": syncSleep, "table": wasmTable, "time": _time, "ws_client_stdout": ws_client_stdout, "ws_init_runtime": ws_init_runtime };
 var asm = createWasm();
 Module["asm"] = asm;
 /** @type {function(...*):?} */
