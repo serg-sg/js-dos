@@ -4,22 +4,26 @@ import { webGl } from "./graphics/webgl";
 import { keyboard } from "./controls/keyboard";
 import { audioNode } from "./sound/audio-node";
 
-export const EmulatorsUi = {
-    dom: {
+export class EmulatorsUi {
+    dom = {
         layers,
-    },
-    network: {
+    };
+
+    network = {
         resolveBundle,
-    },
-    graphics: {
+    };
+
+    graphics = {
         webGl,
-    },
-    sound: {
+    };
+
+    sound = {
         audioNode,
-    },
-    controls: {
+    };
+
+    controls = {
         keyboard,
-    },
+    };
 };
 
-(window as any).emulatorsUi = EmulatorsUi;
+(window as any).emulatorsUi = new EmulatorsUi();
