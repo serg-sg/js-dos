@@ -58,14 +58,16 @@ export class Layers {
         window.addEventListener("keydown", (e) => {
             const keyCode = domToKeyCode(e.keyCode);
             this.onKeyDown(keyCode);
-        }, true);
+        });
 
         window.addEventListener("keyup", (e) => {
             const keyCode = domToKeyCode(e.keyCode);
             this.onKeyUp(keyCode);
-        }, true);
+        });
 
         const controlToggle = (this.controls.querySelector(".emulator-control-toggle") as HTMLDivElement);
+        const sendButton = (this.controls.querySelector(".emulator-control-send-icon") as HTMLDivElement);
+        const sendInput = (this.controls.querySelector(".emulator-control-input-input") as HTMLInputElement);
 
         controlToggle.onclick = () => {
             this.controlsOpened = !this.controlsOpened;
@@ -77,6 +79,21 @@ export class Layers {
                 controlToggle.innerHTML = "&#9660;";
                 this.controls.style.marginTop = "-40px";
             }
+        };
+
+        sendInput.addEventListener("keydown", (e) => e.stopPropagation());
+        sendInput.addEventListener("keyup", (e) => e.stopPropagation());
+
+        sendButton.onclick = () => {
+            const intervalMs = 16;
+            const toSend = sendInput.value.toUpperCase();
+            for (let i = 0; i < toSend.length; ++i) {
+                const charCode = toSend.charCodeAt(i);
+                const keyCode = domToKeyCode(charCode);
+                setTimeout(() => this.onKeyDown(keyCode), intervalMs * (2 * i));
+                setTimeout(() => this.onKeyUp(keyCode), intervalMs * (2 * i + 1));
+            }
+            sendInput.value = "";
         };
     }
 
@@ -130,7 +147,9 @@ function createControlsLayer() {
 <div class='emulator-control-pane'>
   <div class='emulator-control-input'>
     <div class='emulator-control-input-icon'></div>
-    <input class='emulator-control-input-input' type="text">
+    <div class='emulator-control-input-wrapper'>
+      <input class='emulator-control-input-input' type="text">
+    </div>
     <div class='emulator-control-send-icon'></div>
   </div>
   <div class='emulator-control-fullscreen-icon'></div>
