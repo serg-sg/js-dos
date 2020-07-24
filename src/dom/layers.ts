@@ -13,6 +13,7 @@ export class Layers {
     root: HTMLDivElement;
     loading: HTMLDivElement;
     canvas: HTMLCanvasElement;
+    mouseOverlay: HTMLDivElement;
     controls: HTMLDivElement;
     width: number;
     height: number;
@@ -33,8 +34,10 @@ export class Layers {
 
         this.loading = createLoadingLayer();
         this.controls = createControlsLayer();
+        this.mouseOverlay = createMouseOverlayLayer();
 
         this.root.appendChild(this.canvas);
+        this.root.appendChild(this.mouseOverlay);
         this.root.appendChild(this.controls);
         this.root.appendChild(this.loading);
 
@@ -68,6 +71,7 @@ export class Layers {
         const controlToggle = (this.controls.querySelector(".emulator-control-toggle") as HTMLDivElement);
         const sendButton = (this.controls.querySelector(".emulator-control-send-icon") as HTMLDivElement);
         const sendInput = (this.controls.querySelector(".emulator-control-input-input") as HTMLInputElement);
+        const fullscreenButton = (this.controls.querySelector(".emulator-control-fullscreen-icon") as HTMLInputElement);
 
         controlToggle.onclick = () => {
             this.controlsOpened = !this.controlsOpened;
@@ -94,6 +98,24 @@ export class Layers {
                 setTimeout(() => this.onKeyUp(keyCode), intervalMs * (2 * i + 1));
             }
             sendInput.value = "";
+        };
+
+        fullscreenButton.onclick = () => {
+            fullscreenButton.classList.add("emulator-enabled");
+            const element = this.root as any;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            } else if (element.webkitEnterFullscreen) {
+                element.webkitEnterFullscreen();
+            } else {
+                this.root.classList.add("emulator-fullscreen-workaround");
+            }
         };
     }
 
@@ -160,4 +182,8 @@ function createControlsLayer() {
 </div>
 </div>
 `);
+}
+
+function createMouseOverlayLayer() {
+    return createDiv("emulator-mouse-overlay", "");
 }
