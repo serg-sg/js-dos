@@ -50,3 +50,6 @@ build
 build-emterp
 src/dos/sokol/sokol
 dist
+
+examples/emulators-ui
+examples/emulators

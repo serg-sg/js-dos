@@ -101,22 +101,43 @@ export class Layers {
         };
 
         fullscreenButton.onclick = () => {
-            fullscreenButton.classList.add("emulator-enabled");
-            const element = this.root as any;
-            if (element.requestFullscreen) {
-                element.requestFullscreen();
-            } else if (element.webkitRequestFullscreen) {
-                element.webkitRequestFullscreen();
-            } else if (element.mozRequestFullScreen) {
-                element.mozRequestFullScreen();
-            } else if (element.msRequestFullscreen) {
-                element.msRequestFullscreen();
-            } else if (element.webkitEnterFullscreen) {
-                element.webkitEnterFullscreen();
+            if (fullscreenButton.classList.contains("emulator-enabled")) {
+                fullscreenButton.classList.remove("emulator-enabled");
+                if (this.root.classList.contains("emulator-fullscreen-workaround")) {
+                    this.root.classList.remove("emulator-fullscreen-workaround");
+                } else if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if ((document as any).webkitExitFullscreen) {
+                    (document as any).webkitExitFullscreen();
+                } else if ((document as any).webkitExitFullscreen) {
+                    (document as any).mozCancelFullScreen();
+                } else if ((document as any).msExitFullscreen) {
+                    (document as any).msExitFullscreen();
+                }
             } else {
-                this.root.classList.add("emulator-fullscreen-workaround");
+                fullscreenButton.classList.add("emulator-enabled");
+                const element = this.root as any;
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                } else if (element.webkitRequestFullscreen) {
+                    element.webkitRequestFullscreen();
+                } else if (element.mozRequestFullScreen) {
+                    element.mozRequestFullScreen();
+                } else if (element.msRequestFullscreen) {
+                    element.msRequestFullscreen();
+                } else if (element.webkitEnterFullscreen) {
+                    element.webkitEnterFullscreen();
+                } else {
+                    this.root.classList.add("emulator-fullscreen-workaround");
+                }
             }
         };
+
+        this.root.onfullscreenchange = () => {
+            if (document.fullscreenElement !== this.root) {
+                fullscreenButton.classList.remove("emulator-enabled");
+            }
+        }
     }
 
     setOnResize(handler: (width: number, height: number) => void) {
