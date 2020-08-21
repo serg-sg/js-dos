@@ -107,7 +107,7 @@ export const KBD_down = 264;
 export const KBD_right = 262;
 export const KBD_extra_lt_gt = 348; // ???
 
-const keycodes: {[index: number]: number} = {
+export const domToKeyCodes: {[index: number]: number} = {
     8: KBD_backspace,
     9: KBD_tab,
     13: KBD_enter,
@@ -211,7 +211,12 @@ const keycodes: {[index: number]: number} = {
     // 224: KBD_left_super,
 }
 
+export const keyCodesToDom: {[index: number]: number} = {};
+for (const next of Object.keys(domToKeyCodes)) {
+    const key = Number.parseInt(next, 10);
+    keyCodesToDom[domToKeyCodes[key]] = key;
+}
 
 export function domToKeyCode(domCode: number) {
-    return keycodes[domCode] || 0;
+    return domToKeyCodes[domCode] || 0;
 }
