@@ -1,1 +1,1 @@
-A set of player elements to build complete emulator on top of `emulators` package
+Ui components for [js-dos 7.xx](https://js-dos.com/v7/build/)
