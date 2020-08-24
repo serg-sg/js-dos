@@ -3,7 +3,7 @@ import { resolveBundle } from "./network/xhr";
 import { webGl } from "./graphics/webgl";
 import { keyboard } from "./controls/keyboard";
 import { nippleArrows } from "./controls/nipple-arrows";
-import { domToKeyCode, domToKeyCodes, keyCodesToDom } from "./dom/keys";
+import { domToKeyCode, domToKeyCodes, keyCodesToDom, namedKeyCodes } from "./dom/keys";
 import { audioNode } from "./sound/audio-node";
 
 export class EmulatorsUi {
@@ -24,6 +24,7 @@ export class EmulatorsUi {
     };
 
     controls = {
+        namedKeyCodes, // mappinf from key name to it's key code
         domToKeyCodes, // mapping from DOM key codes to js-dos key codes
         domToKeyCode, // function that converts DOM key code to js-dos key code
         keyCodesToDom, // mapping from js-dos key codes to DOM key codes
