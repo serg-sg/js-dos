@@ -9,7 +9,7 @@ import { Layers } from "../dom/layers";
 export type Event =
     "dir:up" | "dir:down" | "dir:left" | "dir:right" |
     "plain:up" | "plain:down" | "plain:left" | "plain:right" |
-    "tap";
+    "end:release" | "tap";
 
 export interface EventMapping {
     joystickId: 0 | 1,
@@ -49,12 +49,15 @@ export function nippleArrows(layers: Layers,
         }
     }
 
+    const releaseOnEnd: {[index: number]: boolean} = {};
     const tapJoysticks: {[index: number]: number} = {};
     const usedTimes: {[index: number]: number} = {
     };
     for (const next of mapping) {
         if (next.event === "tap") {
             tapJoysticks[next.joystickId] = next.mapTo;
+        } else if (next.event === "end:release") {
+            releaseOnEnd[next.joystickId] = true;
         } else {
             manager.on(next.event, () => {
                 usedTimes[next.joystickId] = Date.now();
@@ -74,6 +77,11 @@ export function nippleArrows(layers: Layers,
     manager.on("end", () => {
         const id = manager.ids.length - 1;
         const delay = Date.now() - startTimes[id];
+
+        if (releaseOnEnd[id] === true) {
+            release();
+        }
+
         if (tapJoysticks[id] && delay < 500 && usedTimes[id] < startTimes[id]) {
             ci.simulateKeyPress(tapJoysticks[id]);
         }
