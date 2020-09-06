@@ -121,6 +121,14 @@
     background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg width='16px' height='16px' viewBox='0 0 16 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Ctitle%3Ept-icon-send-message%3C/title%3E%3Cg id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'%3E%3Cg id='Icon-16-Copy' fill='%23000000'%3E%3Cpath d='M15.3984822,9.00960062 L1.52748108,15.8754272 C0.991512259,16.1418905 0.351867676,15.9562836 0.105606079,15.4476929 C0.0326430085,15.2970062 0,15.1682739 0,15.0008545 L0,10.1628502 L8.67032307,7.99542047 L0,5.92311789 L0,1.00062561 C0,0.471694946 0.407302856,0 1.00379944,0 C1.1728964,0 1.4196384,0.0395647155 1.57070865,0.115530201 L15.4028924,7.07102614 C15.9376433,7.33992494 16.1531438,7.99138154 15.8842263,8.52609518 C15.7788815,8.73556194 15.6084407,8.90521727 15.3984822,9.00960062 Z' id='pt-icon-send-message'%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
+.emulator-control-save-icon {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    margin: 0 10px;
+    background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 16 16' enable-background='new 0 0 16 16' fill='%23FFFFFF' xml:space='preserve'%3E%3Cg id='floppy_disk'%3E%3Cg%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M15.71,2.29l-2-2C13.53,0.11,13.28,0,13,0h-1v6H4V0H1C0.45,0,0,0.45,0,1v14 c0,0.55,0.45,1,1,1h14c0.55,0,1-0.45,1-1V3C16,2.72,15.89,2.47,15.71,2.29z M14,15H2V9c0-0.55,0.45-1,1-1h10c0.55,0,1,0.45,1,1V15 z M11,1H9v4h2V1z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E%0A");
+}
+
 .emulator-control-fullscreen-icon {
     width: 16px;
     height: 16px;

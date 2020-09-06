@@ -21,6 +21,7 @@ export class Layers {
     private onResize: (width: number, height: number) => void;
     private onKeyDown: (keyCode: number) => void;
     private onKeyUp: (keyCode: number) => void;
+    private onSave: () => void;
 
     private controlsOpened = false;
 
@@ -47,6 +48,7 @@ export class Layers {
         this.onResize = () => { /**/ };
         this.onKeyDown = () => { /**/ };
         this.onKeyUp = () => { /**/ };
+        this.onSave = () => { /**/ };
 
         resizeDetector.listenTo(this.root, (el: HTMLElement) => {
             if (el !== root) {
@@ -71,6 +73,7 @@ export class Layers {
         const controlToggle = (this.controls.querySelector(".emulator-control-toggle") as HTMLDivElement);
         const sendButton = (this.controls.querySelector(".emulator-control-send-icon") as HTMLDivElement);
         const sendInput = (this.controls.querySelector(".emulator-control-input-input") as HTMLInputElement);
+        const saveButton = (this.controls.querySelector(".emulator-control-save-icon") as HTMLInputElement);
         const fullscreenButton = (this.controls.querySelector(".emulator-control-fullscreen-icon") as HTMLInputElement);
 
         controlToggle.onclick = () => {
@@ -98,6 +101,10 @@ export class Layers {
                 setTimeout(() => this.onKeyUp(keyCode), intervalMs * (2 * i + 1));
             }
             sendInput.value = "";
+        };
+
+        saveButton.onclick = () => {
+            this.onSave();
         };
 
         fullscreenButton.onclick = () => {
@@ -152,6 +159,10 @@ export class Layers {
         this.onKeyUp = handler;
     }
 
+    setOnSave(handler: () => void) {
+        this.onSave = handler;
+    }
+
     hideLoadingLayer() {
         this.loading.style.visibility = "hidden";
     }
@@ -195,6 +206,7 @@ function createControlsLayer() {
     </div>
     <div class='emulator-control-send-icon'></div>
   </div>
+  <div class='emulator-control-save-icon'></div>
   <div class='emulator-control-fullscreen-icon'></div>
 </div>
 

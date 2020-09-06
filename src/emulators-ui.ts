@@ -5,6 +5,7 @@ import { keyboard } from "./controls/keyboard";
 import { nippleArrows } from "./controls/nipple-arrows";
 import { domToKeyCode, domToKeyCodes, keyCodesToDom, namedKeyCodes } from "./dom/keys";
 import { audioNode } from "./sound/audio-node";
+import { save, load } from "./persist/save-load";
 
 export class EmulatorsUi {
     dom = {
@@ -21,6 +22,11 @@ export class EmulatorsUi {
 
     sound = {
         audioNode, // default auidio processor
+    };
+
+    persist = {
+        save, // store updated bundle into `emulators.cache`
+        load, // get updated bundle form `emulators.cache`
     };
 
     controls = {
