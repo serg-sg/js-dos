@@ -8,7 +8,7 @@ export function save(key: string,
     layers.setOnSave(async () => {
         const cache = await emulators.cache();
         const updated = await ci.persist();
-        cache.put(key, updated.buffer);
+        return cache.put(key, updated.buffer);
     });
 }
 

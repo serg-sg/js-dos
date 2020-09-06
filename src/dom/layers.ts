@@ -1,4 +1,5 @@
 import { domToKeyCode } from "./keys";
+import { Notyf } from "notyf";
 
 // tslint:disable-next-line:no-var-requires
 const elementResizeDetector = require("element-resize-detector");
@@ -21,9 +22,10 @@ export class Layers {
     private onResize: (width: number, height: number) => void;
     private onKeyDown: (keyCode: number) => void;
     private onKeyUp: (keyCode: number) => void;
-    private onSave: () => void;
+    private onSave: () => Promise<void>;
 
     private controlsOpened = false;
+    private notyf = new Notyf();
 
 
     constructor(root: HTMLDivElement) {
@@ -48,7 +50,7 @@ export class Layers {
         this.onResize = () => { /**/ };
         this.onKeyDown = () => { /**/ };
         this.onKeyUp = () => { /**/ };
-        this.onSave = () => { /**/ };
+        this.onSave = () => { return Promise.reject(new Error("Not implemented")); };
 
         resizeDetector.listenTo(this.root, (el: HTMLElement) => {
             if (el !== root) {
@@ -104,7 +106,13 @@ export class Layers {
         };
 
         saveButton.onclick = () => {
-            this.onSave();
+            this.onSave()
+                .then(() => {
+                    this.notyf.success("Saved");
+                })
+                .catch((error) => {
+                    this.notyf.error(error.message);
+                });
         };
 
         fullscreenButton.onclick = () => {
@@ -159,7 +167,7 @@ export class Layers {
         this.onKeyUp = handler;
     }
 
-    setOnSave(handler: () => void) {
+    setOnSave(handler: () => Promise<void>) {
         this.onSave = handler;
     }
 
