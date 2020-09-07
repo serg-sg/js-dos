@@ -7,6 +7,8 @@ import { domToKeyCode, domToKeyCodes, keyCodesToDom, namedKeyCodes } from "./dom
 import { audioNode } from "./sound/audio-node";
 import { save, load } from "./persist/save-load";
 
+import { DosInstance, DosFactoryType } from "./js-dos";
+
 export class EmulatorsUi {
     dom = {
         layers, // DOM components that used by js-dos player
@@ -37,6 +39,13 @@ export class EmulatorsUi {
         keyboard, // default keyboard processor
         nippleArrows, // multitouch control for emulating keyboard on mobiles
     };
+
+    // default player
+    dos: DosFactoryType = (root: HTMLDivElement) => {
+        return new DosInstance(root, this);
+    };
 };
 
-(window as any).emulatorsUi = new EmulatorsUi();
+const impl = new EmulatorsUi();
+(window as any).emulatorsUi = impl;
+(window as any).Dos = impl.dos;
