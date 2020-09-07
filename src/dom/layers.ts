@@ -48,9 +48,13 @@ export class Layers {
 
         this.root.appendChild(this.canvas);
         this.root.appendChild(this.mouseOverlay);
+
+        let exitFullscreen: HTMLDivElement | null = null;
         if (controlSelector !== undefined) {
             this.controls = null;
             this.controlSelector = controlSelector;
+            exitFullscreen = createExitFullscreenElement();
+            this.root.appendChild(exitFullscreen);
         } else {
             const controls = createControlsLayer();
             this.controls = controls;
@@ -138,7 +142,7 @@ export class Layers {
                 });
         };
 
-        fullscreenButton.onclick = () => {
+        const toggleFullscreen = () => {
             if (fullscreenButton.classList.contains("emulator-enabled")) {
                 fullscreenButton.classList.remove("emulator-enabled");
                 if (this.root.classList.contains("emulator-fullscreen-workaround")) {
@@ -151,6 +155,9 @@ export class Layers {
                     (document as any).mozCancelFullScreen();
                 } else if ((document as any).msExitFullscreen) {
                     (document as any).msExitFullscreen();
+                }
+                if (exitFullscreen !== null) {
+                    exitFullscreen.style.display = "none";
                 }
             } else {
                 fullscreenButton.classList.add("emulator-enabled");
@@ -168,8 +175,16 @@ export class Layers {
                 } else {
                     this.root.classList.add("emulator-fullscreen-workaround");
                 }
+                if (exitFullscreen !== null) {
+                    exitFullscreen.style.display = "block";
+                }
             }
         };
+
+        fullscreenButton.onclick = toggleFullscreen;
+        if (exitFullscreen !== null) {
+            exitFullscreen.onclick = toggleFullscreen;
+        }
 
         this.root.onfullscreenchange = () => {
             if (document.fullscreenElement !== this.root) {
@@ -246,6 +261,10 @@ function createControlsLayer() {
 </div>
 </div>
 `);
+}
+
+function createExitFullscreenElement() {
+    return createDiv("emulator-control-exit-fullscreen-icon", "");
 }
 
 function createMouseOverlayLayer() {
