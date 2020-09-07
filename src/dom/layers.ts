@@ -6,8 +6,15 @@ const elementResizeDetector = require("element-resize-detector");
 const resizeDetector = elementResizeDetector({
 });
 
-export function layers(root: HTMLDivElement) {
-    return new Layers(root);
+export interface ControlSelector {
+    input: () => HTMLInputElement;
+    send: () => HTMLElement;
+    save: () => HTMLElement;
+    fullscreen: () => HTMLElement;
+}
+
+export function layers(root: HTMLDivElement, controlSelector?: ControlSelector) {
+    return new Layers(root, controlSelector);
 }
 
 export class Layers {
@@ -15,7 +22,8 @@ export class Layers {
     loading: HTMLDivElement;
     canvas: HTMLCanvasElement;
     mouseOverlay: HTMLDivElement;
-    controls: HTMLDivElement;
+    controls: HTMLDivElement | null;
+    controlSelector: ControlSelector;
     width: number;
     height: number;
 
@@ -28,7 +36,7 @@ export class Layers {
     private notyf = new Notyf();
 
 
-    constructor(root: HTMLDivElement) {
+    constructor(root: HTMLDivElement, controlSelector?: ControlSelector) {
         this.root = root;
         this.root.classList.add("emulator-root");
 
@@ -36,12 +44,24 @@ export class Layers {
         this.canvas.className = "emulator-canvas";
 
         this.loading = createLoadingLayer();
-        this.controls = createControlsLayer();
         this.mouseOverlay = createMouseOverlayLayer();
 
         this.root.appendChild(this.canvas);
         this.root.appendChild(this.mouseOverlay);
-        this.root.appendChild(this.controls);
+        if (controlSelector !== undefined) {
+            this.controls = null;
+            this.controlSelector = controlSelector;
+        } else {
+            const controls = createControlsLayer();
+            this.controls = controls;
+            this.root.appendChild(controls);
+            this.controlSelector = {
+                send: () => controls.querySelector(".emulator-control-send-icon") as HTMLElement,
+                input: () => controls.querySelector(".emulator-control-input-input") as HTMLInputElement,
+                save: () => controls.querySelector(".emulator-control-save-icon") as HTMLElement,
+                fullscreen: () => controls.querySelector(".emulator-control-fullscreen-icon") as HTMLElement,
+            };
+        }
         this.root.appendChild(this.loading);
 
         this.width = root.offsetWidth;
@@ -72,23 +92,26 @@ export class Layers {
             this.onKeyUp(keyCode);
         });
 
-        const controlToggle = (this.controls.querySelector(".emulator-control-toggle") as HTMLDivElement);
-        const sendButton = (this.controls.querySelector(".emulator-control-send-icon") as HTMLDivElement);
-        const sendInput = (this.controls.querySelector(".emulator-control-input-input") as HTMLInputElement);
-        const saveButton = (this.controls.querySelector(".emulator-control-save-icon") as HTMLInputElement);
-        const fullscreenButton = (this.controls.querySelector(".emulator-control-fullscreen-icon") as HTMLInputElement);
+        const sendButton = this.controlSelector.send();
+        const sendInput = this.controlSelector.input();
+        const saveButton = this.controlSelector.save();
+        const fullscreenButton = this.controlSelector.fullscreen();
 
-        controlToggle.onclick = () => {
-            this.controlsOpened = !this.controlsOpened;
+        if (this.controls !== null) {
+            const controls = this.controls;
+            const controlToggle = controls.querySelector(".emulator-control-toggle") as HTMLDivElement;
+            controlToggle.onclick = () => {
+                this.controlsOpened = !this.controlsOpened;
 
-            if (this.controlsOpened) {
-                controlToggle.innerHTML = "&#9650;";
-                this.controls.style.marginTop = "0px";
-            } else {
-                controlToggle.innerHTML = "&#9660;";
-                this.controls.style.marginTop = "-40px";
-            }
-        };
+                if (this.controlsOpened) {
+                    controlToggle.innerHTML = "&#9650;";
+                    controls.style.marginTop = "0px";
+                } else {
+                    controlToggle.innerHTML = "&#9660;";
+                    controls.style.marginTop = "-40px";
+                }
+            };
+        }
 
         sendInput.addEventListener("keydown", (e) => e.stopPropagation());
         sendInput.addEventListener("keyup", (e) => e.stopPropagation());

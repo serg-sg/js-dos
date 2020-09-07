@@ -7,7 +7,7 @@ import { domToKeyCode, domToKeyCodes, keyCodesToDom, namedKeyCodes } from "./dom
 import { audioNode } from "./sound/audio-node";
 import { save, load } from "./persist/save-load";
 
-import { DosInstance, DosFactoryType } from "./js-dos";
+import { DosInstance, DosFactoryType, DosOptions } from "./js-dos";
 
 export class EmulatorsUi {
     dom = {
@@ -41,8 +41,8 @@ export class EmulatorsUi {
     };
 
     // default player
-    dos: DosFactoryType = (root: HTMLDivElement) => {
-        return new DosInstance(root, this);
+    dos: DosFactoryType = (root: HTMLDivElement, options?: DosOptions) => {
+        return new DosInstance(root, this, options || {});
     };
 };
 

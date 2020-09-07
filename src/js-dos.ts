@@ -1,17 +1,21 @@
 import { Emulators, CommandInterface } from "emulators";
 import { EmulatorsUi } from "./emulators-ui";
-import { Layers } from "./dom/layers";
+import { Layers, ControlSelector } from "./dom/layers";
 
 declare const emulators: Emulators;
+
+export interface DosOptions {
+    controlSelector?: ControlSelector;
+}
 
 export class DosInstance {
     emulatorsUi: EmulatorsUi;
     layers: Layers;
     ciPromise?: Promise<CommandInterface>;
 
-    constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi) {
+    constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi, options: DosOptions) {
         this.emulatorsUi = emulatorsUi;
-        this.layers = this.emulatorsUi.dom.layers(root);
+        this.layers = this.emulatorsUi.dom.layers(root, options.controlSelector);
         this.layers.showLoadingLayer();
     }
 
@@ -55,4 +59,4 @@ export class DosInstance {
     }
 }
 
-export type DosFactoryType = (root: HTMLDivElement) => DosInstance;
+export type DosFactoryType = (root: HTMLDivElement, options?: DosOptions) => DosInstance;
