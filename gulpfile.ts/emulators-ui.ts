@@ -23,6 +23,11 @@ function copyCss() {
         .pipe(dest("dist"));
 }
 
+function copyAssets() {
+    return src("src/emulators-ui-loader.gif")
+        .pipe(dest("dist"));
+}
+
 function js() {
     return browserify({
         debug: true,
@@ -50,4 +55,4 @@ function js() {
         .pipe(dest("dist"));
 }
 
-export const emulatorsUi = series(clean, js, copyCss);
+export const emulatorsUi = series(clean, js, copyCss, copyAssets);

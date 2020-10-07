@@ -1,10 +1,12 @@
 import { layers } from "./dom/layers";
 import { resolveBundle } from "./network/xhr";
 import { webGl } from "./graphics/webgl";
+import { video } from "./graphics/video";
 import { keyboard } from "./controls/keyboard";
 import { nippleArrows } from "./controls/nipple-arrows";
 import { domToKeyCode, domToKeyCodes, keyCodesToDom, namedKeyCodes } from "./dom/keys";
 import { audioNode } from "./sound/audio-node";
+import { notyf } from "./notification/notyf";
 import { save, load } from "./persist/save-load";
 
 import { DosInstance, DosFactoryType, DosOptions } from "./js-dos";
@@ -20,6 +22,7 @@ export class EmulatorsUi {
 
     graphics = {
         webGl, // default webgl renderer
+        video, // default janus renderer
     };
 
     sound = {
@@ -38,6 +41,10 @@ export class EmulatorsUi {
         keyCodesToDom, // mapping from js-dos key codes to DOM key codes
         keyboard, // default keyboard processor
         nippleArrows, // multitouch control for emulating keyboard on mobiles
+    };
+
+    notifications = {
+        notyf, // default notifications system
     };
 
     // default player

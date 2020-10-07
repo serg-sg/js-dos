@@ -21,20 +21,21 @@ export class Layers {
     root: HTMLDivElement;
     loading: HTMLDivElement;
     canvas: HTMLCanvasElement;
+    video: HTMLVideoElement;
     mouseOverlay: HTMLDivElement;
     controls: HTMLDivElement | null;
     controlSelector: ControlSelector;
     width: number;
     height: number;
+    notyf = new Notyf();
 
+    private clickToStart: HTMLDivElement;
+    private loaderText: HTMLPreElement;
     private onResize: (width: number, height: number) => void;
     private onKeyDown: (keyCode: number) => void;
     private onKeyUp: (keyCode: number) => void;
     private onSave: () => Promise<void>;
-
     private controlsOpened = false;
-    private notyf = new Notyf();
-
 
     constructor(root: HTMLDivElement, controlSelector?: ControlSelector) {
         this.root = root;
@@ -43,11 +44,25 @@ export class Layers {
         this.canvas = document.createElement("canvas");
         this.canvas.className = "emulator-canvas";
 
+        this.video = document.createElement("video");
+        this.video.setAttribute("autoplay", "");
+        this.video.setAttribute("playsinline", "");
+        this.video.className = "emulator-video";
+
         this.loading = createLoadingLayer();
+        this.loaderText = this.loading.querySelector(".emulator-loading-pre-2") as HTMLPreElement;
         this.mouseOverlay = createMouseOverlayLayer();
 
+        this.clickToStart = createClickToStartLayer();
+        this.clickToStart.onclick = () => {
+            this.clickToStart.style.display = "none";
+            this.video.play();
+        };
+
         this.root.appendChild(this.canvas);
+        this.root.appendChild(this.video);
         this.root.appendChild(this.mouseOverlay);
+        this.root.appendChild(this.clickToStart);
 
         let exitFullscreen: HTMLDivElement | null = null;
         if (controlSelector !== undefined) {
@@ -216,6 +231,19 @@ export class Layers {
     showLoadingLayer() {
         this.loading.style.visibility = "visible";
     }
+
+    setLoadingMessage(message: string) {
+        this.loaderText.innerHTML = message;
+    }
+
+    switchToVideo() {
+        this.video.style.display = "block";
+        this.canvas.style.display = "none";
+    }
+
+    showClickToStart() {
+        this.clickToStart.style.display = "flex";
+    }
 }
 
 function createDiv(className: string, innerHtml: string) {
@@ -238,6 +266,8 @@ function createLoadingLayer() {
 </pre>
 <pre class='emulator-loading-pre-2'>
 </pre>
+<div class='emulator-loader'>
+</div>
 </div>
 `);
 }
@@ -269,4 +299,11 @@ function createExitFullscreenElement() {
 
 function createMouseOverlayLayer() {
     return createDiv("emulator-mouse-overlay", "");
+}
+
+function createClickToStartLayer() {
+    return createDiv("emulator-click-to-start-overlay", `
+<div class="emulator-click-to-start-text">Press to start</div>
+<div class="emulator-click-to-start-icon"></div>
+`);
 }
