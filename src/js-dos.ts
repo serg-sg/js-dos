@@ -9,6 +9,7 @@ export type EmulatorFunction = "dosWorker" | "dosDirect" | "janus";
 export interface DosOptions {
     controlSelector?: ControlSelector;
     emulatorFunction?: EmulatorFunction;
+    clickToStart?: boolean;
 }
 
 export class DosInstance {
@@ -17,9 +18,12 @@ export class DosInstance {
     layers: Layers;
     ciPromise?: Promise<CommandInterface>;
 
+    private clickToStart: boolean;
+
     constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi, options: DosOptions) {
         this.emulatorsUi = emulatorsUi;
         this.emulatorFunction = options.emulatorFunction || "dosWorker";
+        this.clickToStart = options.clickToStart || false;
         this.layers = this.emulatorsUi.dom.layers(root, options.controlSelector);
         this.layers.showLoadingLayer();
     }
@@ -68,7 +72,7 @@ export class DosInstance {
         this.layers.setLoadingMessage("Ready");
         this.layers.hideLoadingLayer();
 
-        if (this.emulatorFunction === "janus") {
+        if (this.clickToStart) {
             this.layers.showClickToStart();
         }
 
