@@ -20,7 +20,7 @@ class SamplesQueue {
         while (this.samplesQueue.length > 0) {
             const src = this.samplesQueue[0];
             const toRead = Math.min(bufferSize - writeIt, src.length);
-            if (toRead >= this.samplesQueue[0].length) {
+            if (toRead === src.length) {
                 dst.set(src, writeIt);
                 this.samplesQueue.shift();
             } else {
@@ -35,9 +35,8 @@ class SamplesQueue {
             }
         }
 
-        while (writeIt < bufferSize) {
-            dst[writeIt] = 0;
-            writeIt++;
+        if (writeIt < bufferSize) {
+            dst.fill(0, writeIt);
         }
     }
 }
@@ -45,7 +44,6 @@ class SamplesQueue {
 export function audioNode(ci: CommandInterface) {
     const sampleRate = ci.soundFrequency();
     const channels = 1;
-    const bufferSize = 2048;
 
     let audioContext: AudioContext | null = null;
 
@@ -66,17 +64,34 @@ export function audioNode(ci: CommandInterface) {
     }
 
     const samplesQueue = new SamplesQueue();
+    const bufferSize = 2048;
+    const preBufferSize = 4096;
 
     ci.events().onSoundPush((samples) => {
-        if (samplesQueue.length() < bufferSize * 2) {
+        if (samplesQueue.length() < bufferSize * 2 + preBufferSize) {
             samplesQueue.push(samples);
         }
     });
 
     const audioNode = audioContext.createScriptProcessor(bufferSize, 0, channels);
+    let started = false;
     audioNode.onaudioprocess = (event) => {
         const numFrames = event.outputBuffer.length;
         const numChannels = event.outputBuffer.numberOfChannels;
+        const samplesCount = samplesQueue.length();
+
+        if (!started) {
+            started = samplesCount >= preBufferSize;
+        }
+
+        if (!started) {
+            return;
+        }
+
+        if (samplesCount < numFrames) {
+            return;
+        }
+
         for (let channel = 0; channel < numChannels; channel++) {
             const channelData = event.outputBuffer.getChannelData(channel);
             samplesQueue.writeTo(channelData, numFrames);
