@@ -34,6 +34,7 @@ export class Layers {
     private onResize: (width: number, height: number) => void;
     private onKeyDown: (keyCode: number) => void;
     private onKeyUp: (keyCode: number) => void;
+    private onKeyPress: (keyCode: number) => void;
     private onSave: () => Promise<void>;
     private controlsOpened = false;
 
@@ -89,6 +90,7 @@ export class Layers {
         this.onResize = () => { /**/ };
         this.onKeyDown = () => { /**/ };
         this.onKeyUp = () => { /**/ };
+        this.onKeyPress = () => { /**/ };
         this.onSave = () => { return Promise.reject(new Error("Not implemented")); };
 
         resizeDetector.listenTo(this.root, (el: HTMLElement) => {
@@ -125,6 +127,10 @@ export class Layers {
                 if (this.controlsOpened) {
                     controlToggle.innerHTML = "&#9650;";
                     controls.style.marginTop = "0px";
+
+                    setTimeout(() => {
+                        sendInput.focus();
+                    }, 16);
                 } else {
                     controlToggle.innerHTML = "&#9660;";
                     controls.style.marginTop = "-40px";
@@ -218,6 +224,10 @@ export class Layers {
 
     setOnKeyUp(handler: (keyCode: number) => void) {
         this.onKeyUp = handler;
+    }
+
+    setOnKeyPress(handler: (keyCode: number) => void) {
+        this.onKeyPress = handler;
     }
 
     setOnSave(handler: () => Promise<void>) {
