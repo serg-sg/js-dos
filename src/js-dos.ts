@@ -60,13 +60,18 @@ export class DosInstance {
             emulatorsUi.sound.audioNode(ci);
         }
 
-        emulatorsUi.controls.keyboard(this.layers, ci);
 
         this.layers.setLoadingMessage("Waiting for config...");
         const config = await ci.config();
         const gestures = (config as any).gestures;
+        const buttons = (config as any).buttons;
+        const mapper = (config as any).mapper;
+        emulatorsUi.controls.keyboard(this.layers, ci, mapper || {});
         if (gestures && gestures.length) {
-            emulatorsUi.controls.nippleArrows(this.layers, ci, gestures);
+            emulatorsUi.controls.nipple(this.layers, ci, gestures);
+        }
+        if (buttons && buttons.length) {
+            emulatorsUi.controls.button(this.layers, ci, buttons);
         }
 
         this.layers.setLoadingMessage("Ready");

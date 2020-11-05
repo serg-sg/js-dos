@@ -222,12 +222,24 @@ export class Layers {
         this.onKeyDown = handler;
     }
 
+    fireKeyDown(keyCode: number) {
+        this.onKeyDown(keyCode);
+    }
+
     setOnKeyUp(handler: (keyCode: number) => void) {
         this.onKeyUp = handler;
     }
 
+    fireKeyUp(keyCode: number) {
+        this.onKeyUp(keyCode);
+    }
+
     setOnKeyPress(handler: (keyCode: number) => void) {
         this.onKeyPress = handler;
+    }
+
+    fireKeyPress(keyCode: number) {
+        this.onKeyPress(keyCode);
     }
 
     setOnSave(handler: () => Promise<void>) {

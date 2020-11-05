@@ -1,15 +1,28 @@
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
 
-export function keyboard(layers: Layers, ci: CommandInterface) {
+export type Mapper = {[keyCode: number]: number};
+
+export function keyboard(layers: Layers,
+                         ci: CommandInterface,
+                         mapperOpt?: Mapper) {
+    const mapper = mapperOpt || {};
+    function map(keyCode: number) {
+        if (mapper[keyCode] !== undefined) {
+            return mapper[keyCode];
+        }
+
+        return keyCode;
+    }
+
     layers.setOnKeyDown((keyCode: number) => {
-        ci.sendKeyEvent(keyCode, true);
+        ci.sendKeyEvent(map(keyCode), true);
     });
     layers.setOnKeyUp((keyCode: number) => {
-        ci.sendKeyEvent(keyCode, false);
+        ci.sendKeyEvent(map(keyCode), false);
     });
     layers.setOnKeyPress((keyCode: number) => {
-        ci.simulateKeyPress(keyCode);
+        ci.simulateKeyPress(map(keyCode));
     });
 
     ci.events().onExit(() => {
