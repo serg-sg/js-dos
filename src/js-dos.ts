@@ -1,6 +1,9 @@
 import { Emulators, CommandInterface } from "emulators";
 import { EmulatorsUi } from "./emulators-ui";
 import { Layers, ControlSelector } from "./dom/layers";
+import { Button } from "./controls/button";
+import { EventMapping } from "./controls/nipple";
+import { Mapper } from "./controls/keyboard";
 
 declare const emulators: Emulators;
 
@@ -63,16 +66,21 @@ export class DosInstance {
 
         this.layers.setLoadingMessage("Waiting for config...");
         const config = await ci.config();
-        const gestures = (config as any).gestures;
-        const buttons = (config as any).buttons;
-        const mapper = (config as any).mapper;
-        emulatorsUi.controls.keyboard(this.layers, ci, mapper || {});
-        if (gestures && gestures.length) {
-            emulatorsUi.controls.nipple(this.layers, ci, gestures);
+        const layersConfig = extractLayersConfig(config);
+        const defaultLayer = layersConfig["default"];
+
+        if (defaultLayer !== undefined) {
+            emulatorsUi.controls.keyboard(this.layers, ci, defaultLayer.mapper);
+
+            if (defaultLayer.gestures !== undefined && defaultLayer.gestures.length > 0) {
+                emulatorsUi.controls.nipple(this.layers, ci, defaultLayer.gestures);
+            }
+
+            if (defaultLayer.buttons !== undefined && defaultLayer.buttons.length) {
+                emulatorsUi.controls.button(this.layers, ci, defaultLayer.buttons);
+            }
         }
-        if (buttons && buttons.length) {
-            emulatorsUi.controls.button(this.layers, ci, buttons);
-        }
+
 
         this.layers.setLoadingMessage("Ready");
         this.layers.hideLoadingLayer();
@@ -100,3 +108,32 @@ export class DosInstance {
 }
 
 export type DosFactoryType = (root: HTMLDivElement, options?: DosOptions) => DosInstance;
+
+
+interface LayerConfig {
+    name: string,
+    buttons: Button[],
+    gestures: EventMapping[],
+    mapper: Mapper,
+};
+
+type LayersConfig = {[index: string]: LayerConfig};
+
+function extractLayersConfig(config: any): LayersConfig {
+    if (config.layers !== undefined) {
+        return config.layers;
+    }
+
+    const gestures = config.gestures;
+    const buttons = config.buttons;
+    const mapper = config.mapper;
+
+    return {
+        default: {
+            name: "fallback",
+            gestures: gestures || [],
+            buttons: buttons || [],
+            mapper: mapper || {},
+        }
+    };
+}

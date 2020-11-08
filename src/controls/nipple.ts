@@ -29,7 +29,7 @@ export function nipple(layers: Layers,
     let pressed = -1;
 
     const press = (keyCode: number) => {
-        layers.fireKeyUp(keyCode);
+        layers.fireKeyDown(keyCode);
         pressed = keyCode;
     }
 
