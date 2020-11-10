@@ -142,14 +142,23 @@ export class Layers {
         sendInput.addEventListener("keyup", (e) => e.stopPropagation());
 
         sendButton.onclick = () => {
-            const intervalMs = 16;
+            const intervalMs = 32;
             const toSend = sendInput.value.toUpperCase();
-            for (let i = 0; i < toSend.length; ++i) {
-                const charCode = toSend.charCodeAt(i);
+            let it = 0;
+
+            const sendNext = () => {
+                const charCode = toSend.charCodeAt(it / 2);
+                const fn = it % 2 === 0 ? this.onKeyDown : this.onKeyUp;
                 const keyCode = domToKeyCode(charCode);
-                setTimeout(() => this.onKeyDown(keyCode), intervalMs * (2 * i));
-                setTimeout(() => this.onKeyUp(keyCode), intervalMs * (2 * i + 1));
-            }
+                fn(keyCode);
+                it++;
+
+                if (it / 2 < toSend.length) {
+                    setTimeout(sendNext, intervalMs);
+                }
+            };
+            setTimeout(sendNext, intervalMs);
+
             sendInput.value = "";
         };
 
