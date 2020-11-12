@@ -47,7 +47,7 @@ function initBind() {
 function initKeyCodeToName() {
     const keyCodeToName: {[keyCode: number]: string} = {};
     for (const next of Object.keys(namedKeyCodes)) {
-        keyCodeToName[namedKeyCodes[next]] = next.substr(4, 4 + 2);
+        keyCodeToName[namedKeyCodes[next]] = next.substr(4, 2);
     }
     return keyCodeToName;
 }

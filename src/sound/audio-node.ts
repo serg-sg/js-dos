@@ -65,7 +65,7 @@ export function audioNode(ci: CommandInterface) {
 
     const samplesQueue = new SamplesQueue();
     const bufferSize = 2048;
-    const preBufferSize = 4096;
+    const preBufferSize = 2048;
 
     ci.events().onSoundPush((samples) => {
         if (samplesQueue.length() < bufferSize * 2 + preBufferSize) {
