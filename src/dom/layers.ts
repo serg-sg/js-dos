@@ -7,6 +7,7 @@ const resizeDetector = elementResizeDetector({
 });
 
 export interface ControlSelector {
+    select: () => HTMLSelectElement;
     input: () => HTMLInputElement;
     send: () => HTMLElement;
     save: () => HTMLElement;
@@ -37,6 +38,8 @@ export class Layers {
     private onKeyPress: (keyCode: number) => void;
     private onSave: () => Promise<void>;
     private controlsOpened = false;
+    private selectParentElement: HTMLElement;
+    private selectParentDisplay: string;
 
     constructor(root: HTMLDivElement, controlSelector?: ControlSelector) {
         this.root = root;
@@ -76,12 +79,15 @@ export class Layers {
             this.controls = controls;
             this.root.appendChild(controls);
             this.controlSelector = {
+                select: () => controls.querySelector(".emulator-control-select") as HTMLSelectElement,
                 send: () => controls.querySelector(".emulator-control-send-icon") as HTMLElement,
                 input: () => controls.querySelector(".emulator-control-input-input") as HTMLInputElement,
                 save: () => controls.querySelector(".emulator-control-save-icon") as HTMLElement,
                 fullscreen: () => controls.querySelector(".emulator-control-fullscreen-icon") as HTMLElement,
             };
         }
+        this.selectParentElement = this.controlSelector.select().parentElement as HTMLElement;
+        this.selectParentDisplay = this.selectParentElement.style.display;
         this.root.appendChild(this.loading);
 
         this.width = root.offsetWidth;
@@ -275,6 +281,34 @@ export class Layers {
     showClickToStart() {
         this.clickToStart.style.display = "flex";
     }
+
+    setControlLayers(layers: string[], onChange: (layer: string) => void) {
+        const el = this.controlSelector.select();
+        delete el.onchange;
+
+        while (el.firstChild) {
+            el.removeChild(el.lastChild as Node);
+        }
+
+        if (layers.length <= 1) {
+            this.selectParentElement.style.display = "none";
+            return;
+        }
+
+        for (const next of layers) {
+            const option = document.createElement("option");
+            option.value = next;
+            option.innerHTML = next;
+            el.appendChild(option);
+        }
+
+        el.onchange = (e: any) => {
+            const layer = e.target.value;
+            onChange(layer);
+        };
+
+        this.selectParentElement.style.display = this.selectParentDisplay;
+    }
 }
 
 function createDiv(className: string, innerHtml: string) {
@@ -306,6 +340,10 @@ function createLoadingLayer() {
 function createControlsLayer() {
     return createDiv("emulator-controls", `
 <div class='emulator-control-pane'>
+  <div class='emulator-control-select-wrapper'>
+    <select class='emulator-control-select'>
+    </select>
+  </div>
   <div class='emulator-control-input'>
     <div class='emulator-control-input-icon'></div>
     <div class='emulator-control-input-wrapper'>

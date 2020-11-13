@@ -67,20 +67,41 @@ export class DosInstance {
         this.layers.setLoadingMessage("Waiting for config...");
         const config = await ci.config();
         const layersConfig = extractLayersConfig(config);
-        const defaultLayer = layersConfig["default"];
+        const layersNames = Object.keys(layersConfig);
 
-        if (defaultLayer !== undefined) {
-            emulatorsUi.controls.keyboard(this.layers, ci, defaultLayer.mapper);
+        const unbind = {
+            keyboard: () => {/**/},
+            gestures: () => {/**/},
+            buttons: () => {/**/},
+        };
 
-            if (defaultLayer.gestures !== undefined && defaultLayer.gestures.length > 0) {
-                emulatorsUi.controls.nipple(this.layers, ci, defaultLayer.gestures);
+        const changeLayer = (layerName: string) => {
+            unbind.keyboard();
+            unbind.gestures();
+            unbind.buttons();
+
+            unbind.keyboard = () => {/**/};
+            unbind.gestures = () => {/**/};
+            unbind.buttons = () => {/**/};
+
+            const layer = layersConfig[layerName];
+            if (layer === undefined) {
+                return;
             }
 
-            if (defaultLayer.buttons !== undefined && defaultLayer.buttons.length) {
-                emulatorsUi.controls.button(this.layers, ci, defaultLayer.buttons);
+            unbind.keyboard = emulatorsUi.controls.keyboard(this.layers, ci, layer.mapper);
+
+            if (layer.gestures !== undefined && layer.gestures.length > 0) {
+                unbind.gestures = emulatorsUi.controls.nipple(this.layers, ci, layer.gestures);
+            }
+
+            if (layer.buttons !== undefined && layer.buttons.length) {
+                unbind.buttons = emulatorsUi.controls.button(this.layers, ci, layer.buttons);
             }
         }
+        this.layers.setControlLayers(layersNames, changeLayer);
 
+        changeLayer("default");
 
         this.layers.setLoadingMessage("Ready");
         this.layers.hideLoadingLayer();

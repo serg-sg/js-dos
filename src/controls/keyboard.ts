@@ -25,9 +25,11 @@ export function keyboard(layers: Layers,
         ci.simulateKeyPress(map(keyCode));
     });
 
-    ci.events().onExit(() => {
+    const exitFn = () => {
         layers.setOnKeyDown((keyCode: number) => { /**/ });
         layers.setOnKeyUp((keyCode: number) => { /**/ });
         layers.setOnKeyPress((keyCode: number) => { /**/ });
-    });
+    };
+    ci.events().onExit(exitFn);
+    return exitFn;
 }

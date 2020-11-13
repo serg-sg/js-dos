@@ -77,8 +77,8 @@ export function nipple(layers: Layers,
         }
     });
 
-    ci.events().onExit(() => {
-        manager.destroy();
-    });
+    const exitFn = () => manager.destroy();
+    ci.events().onExit(exitFn);
+    return exitFn;
 }
 

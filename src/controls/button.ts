@@ -55,6 +55,8 @@ function initKeyCodeToName() {
 export function button(layers: Layers,
                        ci: CommandInterface,
                        buttons: Button[]) {
+    const toRemove: HTMLElement[] = [];
+
     for (const next of buttons) {
         const action = next.action;
         const size = next.size || 64;
@@ -95,11 +97,18 @@ export function button(layers: Layers,
             button.addEventListener(next, onEnd, options);
         }
         layers.mouseOverlay.appendChild(button);
-
-        ci.events().onExit(() => {
-            layers.mouseOverlay.removeChild(button);
-        });
+        toRemove.push(button);
     }
+
+    const exitFn = () => {
+        for (const next of toRemove) {
+            if (next.parentElement === layers.mouseOverlay) {
+                layers.mouseOverlay.removeChild(next);
+            }
+        }
+    };
+    ci.events().onExit(exitFn);
+    return exitFn;
 }
 
 function createDiv(className: string, innerHtml: string) {
