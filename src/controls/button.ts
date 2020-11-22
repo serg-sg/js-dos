@@ -23,10 +23,12 @@ function initBind() {
 
     const starters: string[] = [];
     const enders: string[] = [];
+    const prevents: string[] = [];
 
     if (isPointer) {
         starters.push("pointerdown");
         enders.push("pointerup", "pointercancel");
+        prevents.push("touchstart", "touchend");
     } else if (isMSPointer) {
         starters.push("MSPointerDown");
         enders.push("MSPointerUp");
@@ -41,6 +43,7 @@ function initBind() {
     return {
         starters,
         enders,
+        prevents
     };
 }
 
@@ -87,6 +90,10 @@ export function button(layers: Layers,
             e.stopPropagation();
             e.preventDefault();
         };
+        const onPrevent = (e: Event) => {
+            e.stopPropagation();
+            e.preventDefault();
+        };
         const options = {
             capture: true,
         }
@@ -95,6 +102,9 @@ export function button(layers: Layers,
         }
         for (const next of toBind.enders) {
             button.addEventListener(next, onEnd, options);
+        }
+        for (const next of toBind.prevents) {
+            button.addEventListener(next, onPrevent, options);
         }
         layers.mouseOverlay.appendChild(button);
         toRemove.push(button);
