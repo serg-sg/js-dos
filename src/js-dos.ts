@@ -1,6 +1,6 @@
 import { Emulators, CommandInterface } from "emulators";
 import { EmulatorsUi } from "./emulators-ui";
-import { Layers, ControlSelector } from "./dom/layers";
+import { Layers } from "./dom/layers";
 import { Button } from "./controls/button";
 import { EventMapping } from "./controls/nipple";
 import { Mapper } from "./controls/keyboard";
@@ -10,7 +10,6 @@ declare const emulators: Emulators;
 export type EmulatorFunction = "dosWorker" | "dosDirect" | "janus";
 
 export interface DosOptions {
-    controlSelector?: ControlSelector;
     emulatorFunction?: EmulatorFunction;
     clickToStart?: boolean;
 }
@@ -27,7 +26,7 @@ export class DosInstance {
         this.emulatorsUi = emulatorsUi;
         this.emulatorFunction = options.emulatorFunction || "dosWorker";
         this.clickToStart = options.clickToStart || false;
-        this.layers = this.emulatorsUi.dom.layers(root, options.controlSelector);
+        this.layers = this.emulatorsUi.dom.layers(root);
         this.layers.showLoadingLayer();
     }
 
@@ -99,8 +98,8 @@ export class DosInstance {
                 unbind.buttons = emulatorsUi.controls.button(this.layers, ci, layer.buttons);
             }
         }
-        this.layers.setControlLayers(layersNames, changeLayer);
 
+        emulatorsUi.controls.options(this.layers, ci, layersNames, changeLayer);
         changeLayer("default");
 
         this.layers.setLoadingMessage("Ready");

@@ -2,6 +2,8 @@ import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
 import { namedKeyCodes } from "../dom/keys";
 
+export const ButtonSize = 64;
+
 export type ActionType = "click" | "hold";
 // hold - means track press/release events separately
 
@@ -13,8 +15,15 @@ export interface Button {
     style?: ElementCSSInlineStyle;
 }
 
-const toBind = initBind();
+export const toBind = initBind();
 const keyCodeToName = initKeyCodeToName();
+
+const symbolToUrl: {[symbol: string]: string} = {
+    fullscreen: "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 16 16' enable-background='new 0 0 16 16' xml:space='preserve'%3E%3Cg id='maximize_1_' fill='%23FFFFFF'%3E%3Cg%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M5.99,8.99c-0.28,0-0.53,0.11-0.71,0.29l-3.29,3.29v-1.59c0-0.55-0.45-1-1-1 s-1,0.45-1,1v4c0,0.55,0.45,1,1,1h4c0.55,0,1-0.45,1-1s-0.45-1-1-1H3.41L6.7,10.7c0.18-0.18,0.29-0.43,0.29-0.71 C6.99,9.44,6.54,8.99,5.99,8.99z M14.99-0.01h-4c-0.55,0-1,0.45-1,1s0.45,1,1,1h1.59L9.28,5.29C9.1,5.47,8.99,5.72,8.99,5.99 c0,0.55,0.45,1,1,1c0.28,0,0.53-0.11,0.71-0.29l3.29-3.29v1.59c0,0.55,0.45,1,1,1s1-0.45,1-1v-4C15.99,0.44,15.54-0.01,14.99-0.01 z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E",
+    save: "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 16 16' enable-background='new 0 0 16 16' fill='%23FFFFFF' xml:space='preserve'%3E%3Cg id='floppy_disk'%3E%3Cg%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M15.71,2.29l-2-2C13.53,0.11,13.28,0,13,0h-1v6H4V0H1C0.45,0,0,0.45,0,1v14 c0,0.55,0.45,1,1,1h14c0.55,0,1-0.45,1-1V3C16,2.72,15.89,2.47,15.71,2.29z M14,15H2V9c0-0.55,0.45-1,1-1h10c0.55,0,1,0.45,1,1V15 z M11,1H9v4h2V1z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E%0A",
+    options: "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 20 20' enable-background='new 0 0 20 20' fill='%23FFF' xml:space='preserve'%3E%3Cg id='cog_2_'%3E%3Cg%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M19,8h-2.31c-0.14-0.46-0.33-0.89-0.56-1.3l1.7-1.7c0.39-0.39,0.39-1.02,0-1.41 l-1.41-1.41c-0.39-0.39-1.02-0.39-1.41,0l-1.7,1.7c-0.41-0.22-0.84-0.41-1.3-0.55V1c0-0.55-0.45-1-1-1H9C8.45,0,8,0.45,8,1v2.33 C7.52,3.47,7.06,3.67,6.63,3.91L5,2.28c-0.37-0.37-0.98-0.37-1.36,0L2.28,3.64C1.91,4.02,1.91,4.63,2.28,5l1.62,1.62 C3.66,7.06,3.46,7.51,3.31,8H1C0.45,8,0,8.45,0,9v2c0,0.55,0.45,1,1,1h2.31c0.14,0.46,0.33,0.89,0.56,1.3L2.17,15 c-0.39,0.39-0.39,1.02,0,1.41l1.41,1.41c0.39,0.39,1.02,0.39,1.41,0l1.7-1.7c0.41,0.22,0.84,0.41,1.3,0.55V19c0,0.55,0.45,1,1,1h2 c0.55,0,1-0.45,1-1v-2.33c0.48-0.14,0.94-0.35,1.37-0.59L15,17.72c0.37,0.37,0.98,0.37,1.36,0l1.36-1.36 c0.37-0.37,0.37-0.98,0-1.36l-1.62-1.62c0.24-0.43,0.45-0.89,0.6-1.38H19c0.55,0,1-0.45,1-1V9C20,8.45,19.55,8,19,8z M10,14 c-2.21,0-4-1.79-4-4c0-2.21,1.79-4,4-4s4,1.79,4,4C14,12.21,12.21,14,10,14z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E",
+    keyboard: "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 16 16' enable-background='new 0 0 16 16' xml:space='preserve'%3E%3Cg id='manually_entered_data_2_'%3E%3Cg%3E%3Cpath fill='%23FFFFFF' fill-rule='evenodd' clip-rule='evenodd' d='M1,8h3.76l2-2H1C0.45,6,0,6.45,0,7C0,7.55,0.45,8,1,8z M15.49,3.99 C15.8,3.67,16,3.23,16,2.75C16,1.78,15.22,1,14.25,1c-0.48,0-0.92,0.2-1.24,0.51l-1.44,1.44l2.47,2.47L15.49,3.99z M1,4h7.76l2-2 H1C0.45,2,0,2.45,0,3C0,3.55,0.45,4,1,4z M1,10c-0.55,0-1,0.45-1,1c0,0.48,0.35,0.86,0.8,0.96L2.76,10H1z M10.95,3.57l-6.69,6.69 l2.47,2.47l6.69-6.69L10.95,3.57z M15.2,6.04L13.24,8H15c0.55,0,1-0.45,1-1C16,6.52,15.65,6.14,15.2,6.04z M2,15l3.86-1.39 l-2.46-2.44L2,15z M15,10h-3.76l-2,2H15c0.55,0,1-0.45,1-1C16,10.45,15.55,10,15,10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E",
+}
 
 function initBind() {
     const isTouch = !!('ontouchstart' in window);
@@ -55,6 +64,62 @@ function initKeyCodeToName() {
     return keyCodeToName;
 }
 
+export interface ButtonHandler {
+    onDown?: () => void;
+    onUp?: () => void;
+    onClick?: () => void;
+}
+
+export function createButton(symbol: string,
+                             handler: ButtonHandler,
+                             scale: number) {
+    const size = Math.round(Math.max(16, 64 * scale));
+    const backgroundImage = symbolToUrl[symbol.toLowerCase()];
+    const text = backgroundImage === undefined ? symbol : "";
+    const button = createDiv("emulator-button", text === undefined ? "□" : text);
+    if (backgroundImage !== undefined) {
+        button.style.backgroundImage = "url(\"" + backgroundImage + "\")";
+    }
+    button.style.width = size + "px";
+    button.style.height = size + "px";
+    button.style.lineHeight = size + "px";
+    button.style.fontSize = size / 2 + "px";
+    const onStart = (e: Event) => {
+        if (handler.onDown !== undefined) {
+            handler.onDown();
+        }
+        if (handler.onClick !== undefined) {
+            handler.onClick();
+        }
+        e.stopPropagation();
+        e.preventDefault();
+    };
+    const onEnd = (e: Event) => {
+        if (handler.onUp !== undefined) {
+            handler.onUp();
+        }
+        e.stopPropagation();
+        e.preventDefault();
+    };
+    const onPrevent = (e: Event) => {
+        e.stopPropagation();
+        e.preventDefault();
+    };
+    const options = {
+        capture: true,
+    }
+    for (const next of toBind.starters) {
+        button.addEventListener(next, onStart, options);
+    }
+    for (const next of toBind.enders) {
+        button.addEventListener(next, onEnd, options);
+    }
+    for (const next of toBind.prevents) {
+        button.addEventListener(next, onPrevent, options);
+    }
+    return button;
+}
+
 export function button(layers: Layers,
                        ci: CommandInterface,
                        buttons: Button[]) {
@@ -62,49 +127,24 @@ export function button(layers: Layers,
 
     for (const next of buttons) {
         const action = next.action;
-        const size = next.size || 64;
         const symbol = (next.symbol || keyCodeToName[next.mapTo]).toUpperCase();
-        const button = createDiv("emulator-button", symbol !== undefined ? symbol : "□");
+        const keyCode = next.mapTo;
+        // TODO: scale
+        const scale = (next.size || ButtonSize) / ButtonSize;
+        // --
+        const handler: ButtonHandler = action === "click" ?
+            { onClick: () => layers.fireKeyPress(keyCode) } :
+            {
+                onDown: () => layers.fireKeyDown(keyCode),
+                onUp: () => layers.fireKeyUp(keyCode)
+            };
+        const button = createButton(symbol, handler, 1.0);
+
+        button.style.position = "absolute";
         if (next.style) {
             for (const prop of Object.keys(next.style)) {
                 (button.style as any)[prop] = (next.style as any)[prop];
             }
-        }
-        button.style.width = size + "px";
-        button.style.height = size + "px";
-        button.style.lineHeight = size + "px";
-        button.style.fontSize = size / 2 + "px";
-        const onStart = (e: Event) => {
-            if (action === "hold") {
-                layers.fireKeyDown(next.mapTo);
-            } else {
-                layers.fireKeyPress(next.mapTo);
-            }
-            e.stopPropagation();
-            e.preventDefault();
-        };
-        const onEnd = (e: Event) => {
-            if (action === "hold") {
-                layers.fireKeyUp(next.mapTo);
-            }
-            e.stopPropagation();
-            e.preventDefault();
-        };
-        const onPrevent = (e: Event) => {
-            e.stopPropagation();
-            e.preventDefault();
-        };
-        const options = {
-            capture: true,
-        }
-        for (const next of toBind.starters) {
-            button.addEventListener(next, onStart, options);
-        }
-        for (const next of toBind.enders) {
-            button.addEventListener(next, onEnd, options);
-        }
-        for (const next of toBind.prevents) {
-            button.addEventListener(next, onPrevent, options);
         }
         layers.mouseOverlay.appendChild(button);
         toRemove.push(button);

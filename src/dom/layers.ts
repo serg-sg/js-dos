@@ -6,16 +6,8 @@ const elementResizeDetector = require("element-resize-detector");
 const resizeDetector = elementResizeDetector({
 });
 
-export interface ControlSelector {
-    select: () => HTMLSelectElement;
-    input: () => HTMLInputElement;
-    send: () => HTMLElement;
-    save: () => HTMLElement;
-    fullscreen: () => HTMLElement;
-}
-
-export function layers(root: HTMLDivElement, controlSelector?: ControlSelector) {
-    return new Layers(root, controlSelector);
+export function layers(root: HTMLDivElement) {
+    return new Layers(root);
 }
 
 export class Layers {
@@ -24,8 +16,6 @@ export class Layers {
     canvas: HTMLCanvasElement;
     video: HTMLVideoElement;
     mouseOverlay: HTMLDivElement;
-    controls: HTMLDivElement | null;
-    controlSelector: ControlSelector;
     width: number;
     height: number;
     notyf = new Notyf();
@@ -37,11 +27,11 @@ export class Layers {
     private onKeyUp: (keyCode: number) => void;
     private onKeyPress: (keyCode: number) => void;
     private onSave: () => Promise<void>;
-    private controlsOpened = false;
-    private selectParentElement: HTMLElement;
-    private selectParentDisplay: string;
 
-    constructor(root: HTMLDivElement, controlSelector?: ControlSelector) {
+    private fullscreen: boolean = false;
+    private onFullscreenChanged: (fullscreen: boolean) => void = () => {/**/};
+
+    constructor(root: HTMLDivElement) {
         this.root = root;
         this.root.classList.add("emulator-root");
 
@@ -67,27 +57,6 @@ export class Layers {
         this.root.appendChild(this.video);
         this.root.appendChild(this.mouseOverlay);
         this.root.appendChild(this.clickToStart);
-
-        let exitFullscreen: HTMLDivElement | null = null;
-        if (controlSelector !== undefined) {
-            this.controls = null;
-            this.controlSelector = controlSelector;
-            exitFullscreen = createExitFullscreenElement();
-            this.root.appendChild(exitFullscreen);
-        } else {
-            const controls = createControlsLayer();
-            this.controls = controls;
-            this.root.appendChild(controls);
-            this.controlSelector = {
-                select: () => controls.querySelector(".emulator-control-select") as HTMLSelectElement,
-                send: () => controls.querySelector(".emulator-control-send-icon") as HTMLElement,
-                input: () => controls.querySelector(".emulator-control-input-input") as HTMLInputElement,
-                save: () => controls.querySelector(".emulator-control-save-icon") as HTMLElement,
-                fullscreen: () => controls.querySelector(".emulator-control-fullscreen-icon") as HTMLElement,
-            };
-        }
-        this.selectParentElement = this.controlSelector.select().parentElement as HTMLElement;
-        this.selectParentDisplay = this.selectParentElement.style.display;
         this.root.appendChild(this.loading);
 
         this.width = root.offsetWidth;
@@ -119,112 +88,10 @@ export class Layers {
             this.onKeyUp(keyCode);
         });
 
-        const sendButton = this.controlSelector.send();
-        const sendInput = this.controlSelector.input();
-        const saveButton = this.controlSelector.save();
-        const fullscreenButton = this.controlSelector.fullscreen();
-
-        if (this.controls !== null) {
-            const controls = this.controls;
-            const controlToggle = controls.querySelector(".emulator-control-toggle") as HTMLDivElement;
-            controlToggle.onclick = () => {
-                this.controlsOpened = !this.controlsOpened;
-
-                if (this.controlsOpened) {
-                    controlToggle.innerHTML = "&#9650;";
-                    controls.style.marginTop = "0px";
-
-                    setTimeout(() => {
-                        sendInput.focus();
-                    }, 16);
-                } else {
-                    controlToggle.innerHTML = "&#9660;";
-                    controls.style.marginTop = "-40px";
-                }
-            };
-        }
-
-        sendInput.addEventListener("keydown", (e) => e.stopPropagation());
-        sendInput.addEventListener("keyup", (e) => e.stopPropagation());
-
-        sendButton.onclick = () => {
-            const intervalMs = 32;
-            const toSend = sendInput.value.toUpperCase();
-            let it = 0;
-
-            const sendNext = () => {
-                const charCode = toSend.charCodeAt(it / 2);
-                const fn = it % 2 === 0 ? this.onKeyDown : this.onKeyUp;
-                const keyCode = domToKeyCode(charCode);
-                fn(keyCode);
-                it++;
-
-                if (it / 2 < toSend.length) {
-                    setTimeout(sendNext, intervalMs);
-                }
-            };
-            setTimeout(sendNext, intervalMs);
-
-            sendInput.value = "";
-        };
-
-        saveButton.onclick = () => {
-            this.onSave()
-                .then(() => {
-                    this.notyf.success("Saved");
-                })
-                .catch((error) => {
-                    this.notyf.error(error.message);
-                });
-        };
-
-        const toggleFullscreen = () => {
-            if (fullscreenButton.classList.contains("emulator-enabled")) {
-                fullscreenButton.classList.remove("emulator-enabled");
-                if (this.root.classList.contains("emulator-fullscreen-workaround")) {
-                    this.root.classList.remove("emulator-fullscreen-workaround");
-                } else if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if ((document as any).webkitExitFullscreen) {
-                    (document as any).webkitExitFullscreen();
-                } else if ((document as any).webkitExitFullscreen) {
-                    (document as any).mozCancelFullScreen();
-                } else if ((document as any).msExitFullscreen) {
-                    (document as any).msExitFullscreen();
-                }
-                if (exitFullscreen !== null) {
-                    exitFullscreen.style.display = "none";
-                }
-            } else {
-                fullscreenButton.classList.add("emulator-enabled");
-                const element = this.root as any;
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                } else if (element.webkitRequestFullscreen) {
-                    element.webkitRequestFullscreen();
-                } else if (element.mozRequestFullScreen) {
-                    element.mozRequestFullScreen();
-                } else if (element.msRequestFullscreen) {
-                    element.msRequestFullscreen();
-                } else if (element.webkitEnterFullscreen) {
-                    element.webkitEnterFullscreen();
-                } else {
-                    this.root.classList.add("emulator-fullscreen-workaround");
-                }
-                if (exitFullscreen !== null) {
-                    exitFullscreen.style.display = "block";
-                }
-            }
-        };
-
-        fullscreenButton.onclick = toggleFullscreen;
-        if (exitFullscreen !== null) {
-            exitFullscreen.onclick = toggleFullscreen;
-        }
-
         this.root.onfullscreenchange = () => {
             if (document.fullscreenElement !== this.root) {
-                fullscreenButton.classList.remove("emulator-enabled");
+                this.fullscreen = false;
+                this.onFullscreenChanged(this.fullscreen);
             }
         }
     }
@@ -257,6 +124,55 @@ export class Layers {
         this.onKeyPress(keyCode);
     }
 
+    toggleFullscreen() {
+        if (this.fullscreen) {
+            this.fullscreen = false;
+            if (this.root.classList.contains("emulator-fullscreen-workaround")) {
+                this.root.classList.remove("emulator-fullscreen-workaround");
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if ((document as any).webkitExitFullscreen) {
+                (document as any).webkitExitFullscreen();
+            } else if ((document as any).webkitExitFullscreen) {
+                (document as any).mozCancelFullScreen();
+            } else if ((document as any).msExitFullscreen) {
+                (document as any).msExitFullscreen();
+            }
+            this.onFullscreenChanged(false);
+        } else {
+            this.fullscreen = true;
+            const element = this.root as any;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            } else if (element.webkitEnterFullscreen) {
+                element.webkitEnterFullscreen();
+            } else {
+                this.root.classList.add("emulator-fullscreen-workaround");
+            }
+            this.onFullscreenChanged(true);
+        }
+    }
+
+    setOnFullscreen(onFullscreenChanged: (fullscreen: boolean) => void) {
+        this.onFullscreenChanged = onFullscreenChanged;
+    }
+
+    save() {
+        this.onSave()
+            .then(() => {
+                this.notyf.success("Saved");
+            })
+            .catch((error) => {
+                this.notyf.error(error.message);
+            });
+    }
+
     setOnSave(handler: () => Promise<void>) {
         this.onSave = handler;
     }
@@ -280,34 +196,6 @@ export class Layers {
 
     showClickToStart() {
         this.clickToStart.style.display = "flex";
-    }
-
-    setControlLayers(layers: string[], onChange: (layer: string) => void) {
-        const el = this.controlSelector.select();
-        delete el.onchange;
-
-        while (el.firstChild) {
-            el.removeChild(el.lastChild as Node);
-        }
-
-        if (layers.length <= 1) {
-            this.selectParentElement.style.display = "none";
-            return;
-        }
-
-        for (const next of layers) {
-            const option = document.createElement("option");
-            option.value = next;
-            option.innerHTML = next;
-            el.appendChild(option);
-        }
-
-        el.onchange = (e: any) => {
-            const layer = e.target.value;
-            onChange(layer);
-        };
-
-        this.selectParentElement.style.display = this.selectParentDisplay;
     }
 }
 
@@ -335,35 +223,6 @@ function createLoadingLayer() {
 </div>
 </div>
 `);
-}
-
-function createControlsLayer() {
-    return createDiv("emulator-controls", `
-<div class='emulator-control-pane'>
-  <div class='emulator-control-select-wrapper'>
-    <select class='emulator-control-select'>
-    </select>
-  </div>
-  <div class='emulator-control-input'>
-    <div class='emulator-control-input-icon'></div>
-    <div class='emulator-control-input-wrapper'>
-      <input class='emulator-control-input-input' type="text">
-    </div>
-    <div class='emulator-control-send-icon'></div>
-  </div>
-  <div class='emulator-control-save-icon'></div>
-  <div class='emulator-control-fullscreen-icon'></div>
-</div>
-
-<div class='emulator-control-toggle'>
-&#9660;
-</div>
-</div>
-`);
-}
-
-function createExitFullscreenElement() {
-    return createDiv("emulator-control-exit-fullscreen-icon", "");
 }
 
 function createMouseOverlayLayer() {
