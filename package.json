@@ -1,6 +1,6 @@
 {
     "name": "emulators-ui",
-    "version": "0.0.40",
+    "version": "0.0.41",
     "description": "Emulators UI",
     "main": "dist/emulators-ui.js",
     "types": "dist/types/emulators-ui.d.ts",
@@ -64,6 +64,7 @@
         "mocha": "^7.1.2",
         "nipplejs": "^0.8.5",
         "notyf": "^3.9.0",
+        "simple-keyboard": "^2.32.48",
         "ts-node": "^8.10.1",
         "tsify": "^4.0.1",
         "tslint": "^6.1.2",

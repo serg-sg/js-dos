@@ -6,8 +6,14 @@ const elementResizeDetector = require("element-resize-detector");
 const resizeDetector = elementResizeDetector({
 });
 
-export function layers(root: HTMLDivElement) {
-    return new Layers(root);
+export interface LayersOptions {
+    scale: number;
+}
+
+export function layers(root: HTMLDivElement, options?: LayersOptions) {
+    return new Layers(root, options || {
+        scale: 1
+    });
 }
 
 export class Layers {
@@ -30,8 +36,10 @@ export class Layers {
 
     private fullscreen: boolean = false;
     private onFullscreenChanged: (fullscreen: boolean) => void = () => {/**/};
+    private scale: number;
 
-    constructor(root: HTMLDivElement) {
+    constructor(root: HTMLDivElement, options: LayersOptions) {
+        this.scale = options.scale;
         this.root = root;
         this.root.classList.add("emulator-root");
 
@@ -196,6 +204,10 @@ export class Layers {
 
     showClickToStart() {
         this.clickToStart.style.display = "flex";
+    }
+
+    getScale() {
+        return this.scale;
     }
 }
 

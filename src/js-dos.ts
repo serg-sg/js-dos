@@ -1,6 +1,6 @@
 import { Emulators, CommandInterface } from "emulators";
 import { EmulatorsUi } from "./emulators-ui";
-import { Layers } from "./dom/layers";
+import { Layers, LayersOptions } from "./dom/layers";
 import { Button } from "./controls/button";
 import { EventMapping } from "./controls/nipple";
 import { Mapper } from "./controls/keyboard";
@@ -12,6 +12,7 @@ export type EmulatorFunction = "dosWorker" | "dosDirect" | "janus";
 export interface DosOptions {
     emulatorFunction?: EmulatorFunction;
     clickToStart?: boolean;
+    layersOptions?: LayersOptions;
 }
 
 export class DosInstance {
@@ -26,7 +27,7 @@ export class DosInstance {
         this.emulatorsUi = emulatorsUi;
         this.emulatorFunction = options.emulatorFunction || "dosWorker";
         this.clickToStart = options.clickToStart || false;
-        this.layers = this.emulatorsUi.dom.layers(root);
+        this.layers = this.emulatorsUi.dom.layers(root, options.layersOptions);
         this.layers.showLoadingLayer();
     }
 

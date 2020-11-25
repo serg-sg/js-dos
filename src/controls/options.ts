@@ -2,43 +2,84 @@ import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
 import { createButton, ButtonSize, toBind } from "./button";
 
+import Keyboard from "simple-keyboard";
+import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc, KBD_leftctrl, KBD_leftalt } from "../dom/keys";
+
 export function options(layers: Layers,
                         ci: CommandInterface,
                         layersNames: string[],
                         onLayerChange: (layer: string) => void) {
-    const scale = 1;
+    const scale = layers.getScale();
     const size = ButtonSize * scale;
     const ident = size / 4;
 
-    let visible = false;
+    let controlsVisbile = false;
+    let keyboardVisible = false;
+
+    const keyboardDiv = createDiv("emulator-keyboard");
+    keyboardDiv.style.display = "none";
+    stopPropagation(keyboardDiv);
+
+    new Keyboard(keyboardDiv, {
+        layout: layout,
+        onKeyPress: button => {
+            const keyCode = buttonToCode(button);
+            if (keyCode !== 0) {
+                layers.fireKeyPress(keyCode);
+            }
+        },
+        preventMouseDownDefault: true,
+        preventMouseUpDefault: true,
+        stopMouseDownPropagation: true,
+        stopMouseUpPropagation: true,
+        autoUseTouchEvents: true,
+        useMouseEvents: true,
+    });
+
+    const toggleKeyboard = () => {
+        keyboardVisible = !keyboardVisible;
+        const display = keyboardVisible ? "block" : "none";
+        keyboardDiv.style.display = display;
+
+        if (keyboardVisible) {
+            keyboard.classList.add("emulator-control-close-icon");
+        } else  {
+            keyboard.classList.remove("emulator-control-close-icon");
+        }
+    };
 
     const children: HTMLElement[] = [
         createSelectForLayers(layersNames, onLayerChange),
         createButton("keyboard", {
-            onClick: () => {},
-        }, 1.0),
+            onClick: toggleKeyboard,
+        }, scale),
         createButton("save", {
             onClick: () => { layers.save(); }
-        }, 1.0),
+        }, scale),
         createButton("fullscreen", {
             onClick: () => { layers.toggleFullscreen(); },
-        }, 1.0),
+        }, scale),
         createButton("options", {
             onClick: () => {
-                visible = !visible;
-                const visibility = visible ? "visible" : "hidden";
+                controlsVisbile = !controlsVisbile;
+                const display = controlsVisbile ? "block" : "none";
                 for (const next of children) {
                     if (next == options) {
                         continue;
                     }
 
-                    next.style.visibility = visibility;
+                    next.style.display = display;
+                }
+
+                if (!controlsVisbile && keyboardVisible) {
+                    toggleKeyboard();
                 }
             }
-        }, 1.0)
+        }, scale)
     ];
     const options = children[children.length - 1];
     const fullscreen = children[children.length - 2];
+    const keyboard = children[children.length - 4];
 
     layers.setOnFullscreen((fullscreenEnabled) => {
         if (fullscreenEnabled) {
@@ -53,8 +94,9 @@ export function options(layers: Layers,
     const container = createDiv("emulator-options");
     for (const next of children) {
         next.style.marginRight = ident + "px";
+        next.style.marginBottom = ident + "px";
         if (next !== options) {
-            next.style.visibility = "hidden";
+            next.style.display = "none";
         }
         container.appendChild(next);
     }
@@ -64,8 +106,10 @@ export function options(layers: Layers,
     container.style.top = ident + "px";
 
     layers.mouseOverlay.appendChild(container);
+    layers.mouseOverlay.appendChild(keyboardDiv);
     ci.events().onExit(() => {
         layers.mouseOverlay.removeChild(container);
+        layers.mouseOverlay.removeChild(keyboardDiv);
         layers.setOnFullscreen(() => {/**/});
     });
 }
@@ -91,27 +135,64 @@ function createSelectForLayers(layers: string[], onChange: (layer: string) => vo
         onChange(layer);
     };
 
+    stopPropagation(select, false);
+
+    return select;
+}
+
+function stopPropagation(el: HTMLElement, preventDefault: boolean = true) {
     const onStop = (e: Event) => {
         e.stopPropagation();
     };
     const onPrevent = (e: Event) => {
         e.stopPropagation();
-        e.preventDefault();
+        if (preventDefault) {
+            e.preventDefault();
+        }
     };
     const options = {
-        capture: true,
+        capture: false,
     };
     for (const next of toBind.starters) {
-        select.addEventListener(next, onStop, options);
+        el.addEventListener(next, onStop, options);
     }
     for (const next of toBind.enders) {
-        select.addEventListener(next, onStop, options);
+        el.addEventListener(next, onStop, options);
     }
     for (const next of toBind.prevents) {
-        select.addEventListener(next, onPrevent, options);
+        el.addEventListener(next, onPrevent, options);
+    }
+}
+
+function buttonToCode(button: string) {
+    let keyCode = 0;
+    if (button.length > 1) {
+        if (button === "{enter}") {
+            keyCode = KBD_enter;
+        } else if (button === "{shift}") {
+            keyCode = KBD_leftshift;
+        } else if (button === "{bksp}") {
+            keyCode = KBD_backspace;
+        } else if (button === "{lock}") {
+            keyCode = KBD_capslock;
+        } else if (button === "{tab}") {
+            keyCode = KBD_tab;
+        } else if (button === "{space}") {
+            keyCode = KBD_space;
+        } else if (button === "{esc}") {
+            keyCode = KBD_esc;
+        } else if (button === "ctrl") {
+            keyCode = KBD_leftctrl;
+        } else if (button === "{alt}") {
+            keyCode = KBD_leftalt;
+        } else {
+            console.warn("Unknown button", button);
+        }
+    } else {
+        keyCode = domToKeyCode(button.toUpperCase().charCodeAt(0));
     }
 
-    return select;
+    return keyCode;
 }
 
 function createDiv(className: string, innerHtml?: string) {
@@ -122,3 +203,12 @@ function createDiv(className: string, innerHtml?: string) {
     }
     return el;
 }
+
+const layout = {
+    default: [
+        '{esc} ` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
+        'q w e r t y u i o p [ ] \\',
+        'a s d f g h j k l ; \' {enter}',
+        'z x c v b n m , . / {space}',
+    ],
+};
