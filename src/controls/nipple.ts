@@ -1,7 +1,7 @@
 // tslint:disable-next-line
 const nipplejs = require("nipplejs");
 
-import { KBD_left, KBD_right, KBD_up, KBD_down, KBD_f1 } from "../dom/keys";
+import { KBD_left, KBD_right, KBD_up, KBD_down, KBD_f1, KBD_NONE } from "../dom/keys";
 
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
@@ -45,16 +45,18 @@ export function nipple(layers: Layers,
     const usedTimes: {[index: number]: number} = {
     };
     for (const next of mapping) {
-        if (next.event === "tap") {
-            tapJoysticks[next.joystickId] = next.mapTo;
-        } else if (next.event === "end:release") {
+        if (next.event === "end:release") {
             releaseOnEnd[next.joystickId] = true;
-        } else {
-            manager.on(next.event, () => {
-                usedTimes[next.joystickId] = Date.now();
-                release();
-                press(next.mapTo);
-            });
+        } else if (next.mapTo !== KBD_NONE) {
+            if (next.event === "tap") {
+                tapJoysticks[next.joystickId] = next.mapTo;
+            } else {
+                manager.on(next.event, () => {
+                    usedTimes[next.joystickId] = Date.now();
+                    release();
+                    press(next.mapTo);
+                });
+            }
         }
     }
 

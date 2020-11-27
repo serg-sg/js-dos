@@ -1,6 +1,6 @@
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
-import { namedKeyCodes } from "../dom/keys";
+import { namedKeyCodes, KBD_NONE } from "../dom/keys";
 
 export const ButtonSize = 52;
 
@@ -126,6 +126,10 @@ export function button(layers: Layers,
     const toRemove: HTMLElement[] = [];
 
     for (const next of buttons) {
+        if (next.mapTo === KBD_NONE) {
+            continue;
+        }
+
         const action = next.action;
         const symbol = (next.symbol || keyCodeToName[next.mapTo]).toUpperCase();
         const keyCode = next.mapTo;
