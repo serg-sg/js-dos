@@ -93,6 +93,9 @@ export function options(layers: Layers,
 
     const container = createDiv("emulator-options");
     for (const next of children) {
+        if (next !== options) {
+            next.classList.add("emulator-button-control");
+        }
         next.style.marginRight = ident + "px";
         next.style.marginBottom = ident + "px";
         if (next !== options) {

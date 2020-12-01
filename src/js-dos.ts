@@ -21,6 +21,9 @@ export class DosInstance {
     layers: Layers;
     ciPromise?: Promise<CommandInterface>;
 
+    enableMobileControls: () => void = () => {/**/};
+    disableMobileControls: () => void = () => {/**/};
+
     private clickToStart: boolean;
 
     constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi, options: DosOptions) {
@@ -75,7 +78,8 @@ export class DosInstance {
             buttons: () => {/**/},
         };
 
-        const changeLayer = (layerName: string) => {
+        let currentLayer = "";
+        const changeControlLayer = (layerName: string) => {
             unbind.keyboard();
             unbind.gestures();
             unbind.buttons();
@@ -84,6 +88,7 @@ export class DosInstance {
             unbind.gestures = () => {/**/};
             unbind.buttons = () => {/**/};
 
+            currentLayer = layerName;
             const layer = layersConfig[layerName];
             if (layer === undefined) {
                 return;
@@ -100,8 +105,19 @@ export class DosInstance {
             }
         }
 
-        emulatorsUi.controls.options(this.layers, ci, layersNames, changeLayer);
-        changeLayer("default");
+        this.disableMobileControls = () => {
+            unbind.gestures();
+            unbind.buttons();
+            unbind.gestures = () => {/**/};
+            unbind.buttons = () => {/**/};
+        }
+
+        this.enableMobileControls = () => {
+            changeControlLayer(currentLayer);
+        }
+
+        emulatorsUi.controls.options(this.layers, ci, layersNames, changeControlLayer);
+        changeControlLayer("default");
 
         this.layers.setLoadingMessage("Ready");
         this.layers.hideLoadingLayer();
