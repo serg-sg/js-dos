@@ -74,6 +74,7 @@ export class DosInstance {
 
         const unbind = {
             keyboard: () => {/**/},
+            mouse: () => {/**/},
             gestures: () => {/**/},
             buttons: () => {/**/},
         };
@@ -81,10 +82,12 @@ export class DosInstance {
         let currentLayer = "";
         const changeControlLayer = (layerName: string) => {
             unbind.keyboard();
+            unbind.mouse();
             unbind.gestures();
             unbind.buttons();
 
             unbind.keyboard = () => {/**/};
+            unbind.mouse = () => {/**/};
             unbind.gestures = () => {/**/};
             unbind.buttons = () => {/**/};
 
@@ -98,6 +101,8 @@ export class DosInstance {
 
             if (layer.gestures !== undefined && layer.gestures.length > 0) {
                 unbind.gestures = emulatorsUi.controls.nipple(this.layers, ci, layer.gestures);
+            } else {
+                unbind.mouse = emulatorsUi.controls.mouse(this.layers, ci);
             }
 
             if (layer.buttons !== undefined && layer.buttons.length) {

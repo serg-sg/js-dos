@@ -29,9 +29,15 @@ export class Layers {
     private clickToStart: HTMLDivElement;
     private loaderText: HTMLPreElement;
     private onResize: (width: number, height: number) => void;
+
     private onKeyDown: (keyCode: number) => void;
     private onKeyUp: (keyCode: number) => void;
     private onKeyPress: (keyCode: number) => void;
+
+    private onMouseDown: (x: number, y: number, button: number) => void;
+    private onMouseUp: (x: number, y: number, button: number) => void;
+    private onMouseMove: (x: number, y: number) => void;
+
     private onSave: () => Promise<void>;
 
     private fullscreen: boolean = false;
@@ -74,6 +80,9 @@ export class Layers {
         this.onKeyDown = () => { /**/ };
         this.onKeyUp = () => { /**/ };
         this.onKeyPress = () => { /**/ };
+        this.onMouseDown = () => { /**/ };
+        this.onMouseUp = () => { /**/ };
+        this.onMouseMove = () => { /**/ };
         this.onSave = () => { return Promise.reject(new Error("Not implemented")); };
 
         resizeDetector.listenTo(this.root, (el: HTMLElement) => {
@@ -94,6 +103,18 @@ export class Layers {
         window.addEventListener("keyup", (e) => {
             const keyCode = domToKeyCode(e.keyCode);
             this.onKeyUp(keyCode);
+        });
+
+        window.addEventListener("mousemove", (e) => {
+            this.onMouseMove(e.offsetX / this.width, e.offsetY / this.height);
+        });
+
+        window.addEventListener("mousedown", (e) => {
+            this.onMouseDown(e.offsetX / this.width, e.offsetY / this.height, e.button);
+        });
+
+        window.addEventListener("mouseup", (e) => {
+            this.onMouseUp(e.offsetX / this.width, e.offsetY / this.height, e.button);
         });
 
         this.root.onfullscreenchange = () => {
@@ -130,6 +151,18 @@ export class Layers {
 
     fireKeyPress(keyCode: number) {
         this.onKeyPress(keyCode);
+    }
+
+    setOnMouseDown(handler: (x: number, y: number, button: number) => void) {
+        this.onMouseDown = handler;
+    }
+
+    setOnMouseUp(handler: (x: number, y: number, button: number) => void) {
+        this.onMouseUp = handler;
+    }
+
+    setOnMouseMove(handler: (x: number, y: number) => void) {
+        this.onMouseMove = handler;
     }
 
     toggleFullscreen() {

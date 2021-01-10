@@ -3,6 +3,7 @@ import { resolveBundle } from "./network/xhr";
 import { webGl } from "./graphics/webgl";
 import { video } from "./graphics/video";
 import { keyboard } from "./controls/keyboard";
+import { mouse } from "./controls/mouse";
 import { nipple } from "./controls/nipple";
 import { button } from "./controls/button";
 import { options } from "./controls/options";
@@ -42,6 +43,7 @@ export class EmulatorsUi {
         domToKeyCode, // function that converts DOM key code to js-dos key code
         keyCodesToDom, // mapping from js-dos key codes to DOM key codes
         keyboard, // default keyboard processor
+        mouse, // default mouse processor
         nipple, // multitouch control for emulating keyboard on mobiles
         button, // button control
         options // default options control (fullscreen, save, etc.)
