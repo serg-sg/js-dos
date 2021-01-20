@@ -1,5 +1,6 @@
 import { domToKeyCode } from "./keys";
 import { Notyf } from "notyf";
+import { pointer, getPointerState } from "../controls/pointer";
 
 // tslint:disable-next-line:no-var-requires
 const elementResizeDetector = require("element-resize-detector");
@@ -95,6 +96,19 @@ export class Layers {
             this.onResize(this.width, this.height);
         });
 
+        this.initKeyEvents();
+        this.initPointerEvents();
+
+
+        this.root.onfullscreenchange = () => {
+            if (document.fullscreenElement !== this.root) {
+                this.fullscreen = false;
+                this.onFullscreenChanged(this.fullscreen);
+            }
+        }
+    }
+
+    private initKeyEvents() {
         window.addEventListener("keydown", (e) => {
             const keyCode = domToKeyCode(e.keyCode);
             this.onKeyDown(keyCode);
@@ -104,24 +118,51 @@ export class Layers {
             const keyCode = domToKeyCode(e.keyCode);
             this.onKeyUp(keyCode);
         });
+    }
 
-        window.addEventListener("mousemove", (e) => {
-            this.onMouseMove(e.offsetX / this.width, e.offsetY / this.height);
-        });
+    private initPointerEvents() {
+        const el = this.mouseOverlay;
 
-        window.addEventListener("mousedown", (e) => {
-            this.onMouseDown(e.offsetX / this.width, e.offsetY / this.height, e.button);
-        });
+        const onStart = (e: Event) => {
+            const state = getPointerState(e, el);
+            this.onMouseDown(state.x, state.y, state.button);
+            e.stopPropagation();
+            e.preventDefault();
+        };
 
-        window.addEventListener("mouseup", (e) => {
-            this.onMouseUp(e.offsetX / this.width, e.offsetY / this.height, e.button);
-        });
+        const onChange = (e: Event) => {
+            const state = getPointerState(e, el);
+            this.onMouseMove(state.x, state.y);
+            e.stopPropagation();
+            e.preventDefault();
+        };
 
-        this.root.onfullscreenchange = () => {
-            if (document.fullscreenElement !== this.root) {
-                this.fullscreen = false;
-                this.onFullscreenChanged(this.fullscreen);
-            }
+        const onEnd = (e: Event) => {
+            const state = getPointerState(e, el);
+            this.onMouseUp(state.x, state.y, state.button);
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
+        const onPrevent = (e: Event) => {
+            e.stopPropagation();
+            e.preventDefault();
+        };
+        const options = {
+            capture: false,
+        }
+
+        for (const next of pointer.starters) {
+            el.addEventListener(next, onStart, options);
+        }
+        for (const next of pointer.changers) {
+            el.addEventListener(next, onChange, options);
+        }
+        for (const next of pointer.enders) {
+            el.addEventListener(next, onEnd, options);
+        }
+        for (const next of pointer.prevents) {
+            el.addEventListener(next, onPrevent, options);
         }
     }
 

@@ -4,8 +4,11 @@ import { Layers, LayersOptions } from "./dom/layers";
 import { Button } from "./controls/button";
 import { EventMapping } from "./controls/nipple";
 import { Mapper } from "./controls/keyboard";
+import { Build } from "./build";
 
 declare const emulators: Emulators;
+
+emulators.cacheSeed += " ui (" + Build.short + ")";
 
 export type EmulatorFunction = "dosWorker" | "dosDirect" | "janus";
 

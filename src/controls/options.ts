@@ -1,6 +1,7 @@
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
-import { createButton, ButtonSize, toBind } from "./button";
+import { createButton, ButtonSize } from "./button";
+import { pointer } from "./pointer";
 
 import Keyboard from "simple-keyboard";
 import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc, KBD_leftctrl, KBD_leftalt } from "../dom/keys";
@@ -48,33 +49,59 @@ export function options(layers: Layers,
         }
     };
 
+    const updateVisibility = () => {
+        const display = controlsVisbile ? "block" : "none";
+        for (const next of children) {
+            if (next == options) {
+                continue;
+            }
+
+            next.style.display = display;
+        }
+    };
+
+    const toggleOptions = () => {
+        controlsVisbile = !controlsVisbile;
+
+        if (!controlsVisbile && keyboardVisible) {
+            toggleKeyboard();
+        }
+
+        updateVisibility();
+    };
+
     const children: HTMLElement[] = [
         createSelectForLayers(layersNames, onLayerChange),
         createButton("keyboard", {
-            onClick: toggleKeyboard,
+            onClick: () => {
+                toggleKeyboard();
+
+                if (controlsVisbile && !keyboardVisible) {
+                    controlsVisbile = false;
+                    updateVisibility();
+                }
+            },
         }, scale),
         createButton("save", {
-            onClick: () => { layers.save(); }
-        }, scale),
-        createButton("fullscreen", {
-            onClick: () => { layers.toggleFullscreen(); },
-        }, scale),
-        createButton("options", {
             onClick: () => {
-                controlsVisbile = !controlsVisbile;
-                const display = controlsVisbile ? "block" : "none";
-                for (const next of children) {
-                    if (next == options) {
-                        continue;
-                    }
+                layers.save();
 
-                    next.style.display = display;
-                }
-
-                if (!controlsVisbile && keyboardVisible) {
-                    toggleKeyboard();
+                if (controlsVisbile) {
+                    toggleOptions();
                 }
             }
+        }, scale),
+        createButton("fullscreen", {
+            onClick: () => {
+                layers.toggleFullscreen();
+
+                if (controlsVisbile) {
+                    toggleOptions();
+                }
+            },
+        }, scale),
+        createButton("options", {
+            onClick: toggleOptions,
         }, scale)
     ];
     const options = children[children.length - 1];
@@ -156,13 +183,13 @@ function stopPropagation(el: HTMLElement, preventDefault: boolean = true) {
     const options = {
         capture: false,
     };
-    for (const next of toBind.starters) {
+    for (const next of pointer.starters) {
         el.addEventListener(next, onStop, options);
     }
-    for (const next of toBind.enders) {
+    for (const next of pointer.enders) {
         el.addEventListener(next, onStop, options);
     }
-    for (const next of toBind.prevents) {
+    for (const next of pointer.prevents) {
         el.addEventListener(next, onPrevent, options);
     }
 }

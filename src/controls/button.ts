@@ -1,6 +1,7 @@
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
 import { namedKeyCodes, KBD_NONE } from "../dom/keys";
+import { pointer } from "./pointer";
 
 export const ButtonSize = 52;
 
@@ -19,39 +20,8 @@ export interface Button {
     },
 }
 
-export const toBind = initBind();
 const keyCodeToName = initKeyCodeToName();
 
-function initBind() {
-    const isTouch = !!('ontouchstart' in window);
-    const isPointer = window.PointerEvent ? true : false;
-    const isMSPointer = window.MSPointerEvent ? true : false;
-
-    const starters: string[] = [];
-    const enders: string[] = [];
-    const prevents: string[] = [];
-
-    if (isPointer) {
-        starters.push("pointerdown");
-        enders.push("pointerup", "pointercancel");
-        prevents.push("touchstart", "touchend");
-    } else if (isMSPointer) {
-        starters.push("MSPointerDown");
-        enders.push("MSPointerUp");
-    } else if (isTouch) {
-        starters.push("touchstart", "mousedown");
-        enders.push("touchend", "touchcancel", "mouseup");
-    } else {
-        starters.push("mousedown");
-        enders.push("mouseup");
-    }
-
-    return {
-        starters,
-        enders,
-        prevents
-    };
-}
 
 function initKeyCodeToName() {
     const keyCodeToName: {[keyCode: number]: string} = {};
@@ -105,13 +75,13 @@ export function createButton(symbol: string,
     const options = {
         capture: true,
     }
-    for (const next of toBind.starters) {
+    for (const next of pointer.starters) {
         button.addEventListener(next, onStart, options);
     }
-    for (const next of toBind.enders) {
+    for (const next of pointer.enders) {
         button.addEventListener(next, onEnd, options);
     }
-    for (const next of toBind.prevents) {
+    for (const next of pointer.prevents) {
         button.addEventListener(next, onPrevent, options);
     }
     return button;
