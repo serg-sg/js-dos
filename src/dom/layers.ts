@@ -1,6 +1,5 @@
 import { domToKeyCode } from "./keys";
 import { Notyf } from "notyf";
-import { pointer, getPointerState } from "../controls/pointer";
 
 // tslint:disable-next-line:no-var-requires
 const elementResizeDetector = require("element-resize-detector");
@@ -34,10 +33,6 @@ export class Layers {
     private onKeyDown: (keyCode: number) => void;
     private onKeyUp: (keyCode: number) => void;
     private onKeyPress: (keyCode: number) => void;
-
-    private onMouseDown: (x: number, y: number, button: number) => void;
-    private onMouseUp: (x: number, y: number, button: number) => void;
-    private onMouseMove: (x: number, y: number) => void;
 
     private onSave: () => Promise<void>;
 
@@ -81,9 +76,6 @@ export class Layers {
         this.onKeyDown = () => { /**/ };
         this.onKeyUp = () => { /**/ };
         this.onKeyPress = () => { /**/ };
-        this.onMouseDown = () => { /**/ };
-        this.onMouseUp = () => { /**/ };
-        this.onMouseMove = () => { /**/ };
         this.onSave = () => { return Promise.reject(new Error("Not implemented")); };
 
         resizeDetector.listenTo(this.root, (el: HTMLElement) => {
@@ -97,7 +89,7 @@ export class Layers {
         });
 
         this.initKeyEvents();
-        this.initPointerEvents();
+        this.preventContextMenu();
 
 
         this.root.onfullscreenchange = () => {
@@ -120,50 +112,12 @@ export class Layers {
         });
     }
 
-    private initPointerEvents() {
-        const el = this.mouseOverlay;
-
-        const onStart = (e: Event) => {
-            const state = getPointerState(e, el);
-            this.onMouseDown(state.x, state.y, state.button);
+    preventContextMenu() {
+        this.root.addEventListener("contextmenu", (e) => {
             e.stopPropagation();
             e.preventDefault();
-        };
-
-        const onChange = (e: Event) => {
-            const state = getPointerState(e, el);
-            this.onMouseMove(state.x, state.y);
-            e.stopPropagation();
-            e.preventDefault();
-        };
-
-        const onEnd = (e: Event) => {
-            const state = getPointerState(e, el);
-            this.onMouseUp(state.x, state.y, state.button);
-            e.stopPropagation();
-            e.preventDefault();
-        };
-
-        const onPrevent = (e: Event) => {
-            e.stopPropagation();
-            e.preventDefault();
-        };
-        const options = {
-            capture: false,
-        }
-
-        for (const next of pointer.starters) {
-            el.addEventListener(next, onStart, options);
-        }
-        for (const next of pointer.changers) {
-            el.addEventListener(next, onChange, options);
-        }
-        for (const next of pointer.enders) {
-            el.addEventListener(next, onEnd, options);
-        }
-        for (const next of pointer.prevents) {
-            el.addEventListener(next, onPrevent, options);
-        }
+            return false;
+        });
     }
 
     setOnResize(handler: (width: number, height: number) => void) {
@@ -192,18 +146,6 @@ export class Layers {
 
     fireKeyPress(keyCode: number) {
         this.onKeyPress(keyCode);
-    }
-
-    setOnMouseDown(handler: (x: number, y: number, button: number) => void) {
-        this.onMouseDown = handler;
-    }
-
-    setOnMouseUp(handler: (x: number, y: number, button: number) => void) {
-        this.onMouseUp = handler;
-    }
-
-    setOnMouseMove(handler: (x: number, y: number) => void) {
-        this.onMouseMove = handler;
     }
 
     toggleFullscreen() {

@@ -1,5 +1,6 @@
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
+import { pointer, getPointerState } from "../controls/pointer";
 
 export function mouse(layers: Layers,
                       ci: CommandInterface) {
@@ -28,30 +29,85 @@ export function mouse(layers: Layers,
         };
     }
 
-    layers.setOnMouseDown((x: number, y: number, button: number) => {
+
+    function onMouseDown(x: number, y: number, button: number) {
         const xy = mapXY(x, y);
         ci.sendMouseMotion(xy.x, xy.y);
         ci.sendMouseButton(button, true);
-    });
+    };
 
-    layers.setOnMouseUp((x: number, y: number, button: number) => {
+    function onMouseUp(x: number, y: number, button: number) {
         ci.sendMouseButton(button, false);
-    });
+    };
 
-    layers.setOnMouseMove((x: number, y: number) => {
+    function onMouseMove(x: number, y: number) {
         const xy = mapXY(x, y);
         ci.sendMouseMotion(xy.x, xy.y);
-    });
+    };
+
+    const el = layers.mouseOverlay;
+
+
+    function preventDefaultIfNeeded(e: Event) {
+        // not needed yet
+    };
+
+    const onStart = (e: Event) => {
+        const state = getPointerState(e, el);
+        onMouseDown(state.x, state.y, state.button);
+        e.stopPropagation();
+        preventDefaultIfNeeded(e);
+    };
+
+    const onChange = (e: Event) => {
+        const state = getPointerState(e, el);
+        onMouseMove(state.x, state.y);
+        e.stopPropagation();
+        preventDefaultIfNeeded(e);
+    };
+
+    const onEnd = (e: Event) => {
+        const state = getPointerState(e, el);
+        onMouseUp(state.x, state.y, state.button);
+        e.stopPropagation();
+        preventDefaultIfNeeded(e);
+    };
+
+    const onPrevent = (e: Event) => {
+        e.stopPropagation();
+        preventDefaultIfNeeded(e);
+    };
+    const options = {
+        capture: false,
+    }
+
+    for (const next of pointer.starters) {
+        el.addEventListener(next, onStart, options);
+    }
+    for (const next of pointer.changers) {
+        el.addEventListener(next, onChange, options);
+    }
+    for (const next of pointer.enders) {
+        el.addEventListener(next, onEnd, options);
+    }
+    for (const next of pointer.prevents) {
+        el.addEventListener(next, onPrevent, options);
+    }
+
 
     const exitFn = () => {
-        layers.setOnMouseDown((x: number, y: number, button: number) => {
-        });
-
-        layers.setOnMouseUp((x: number, y: number, button: number) => {
-        });
-
-        layers.setOnMouseMove((x: number, y: number) => {
-        });
+        for (const next of pointer.starters) {
+            el.removeEventListener(next, onStart, options);
+        }
+        for (const next of pointer.changers) {
+            el.removeEventListener(next, onChange, options);
+        }
+        for (const next of pointer.enders) {
+            el.removeEventListener(next, onEnd, options);
+        }
+        for (const next of pointer.prevents) {
+            el.removeEventListener(next, onPrevent, options);
+        }
     };
 
     ci.events().onExit(exitFn);
