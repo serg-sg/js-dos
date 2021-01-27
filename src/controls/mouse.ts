@@ -24,8 +24,8 @@ export function mouse(layers: Layers,
         const left = (containerWidth - width) / 2;
 
         return {
-            x: Math.max(0, Math.min(frameWidth, (x - left) * (frameWidth / width))),
-            y: Math.max(0, Math.min(frameWidth, (y - top) * (frameHeight / height))),
+            x: Math.max(0, Math.min(1, (x - left) / width)),
+            y: Math.max(0, Math.min(1, (y - top) / height)),
         };
     }
 
