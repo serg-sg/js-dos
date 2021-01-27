@@ -37,17 +37,25 @@ export class DosInstance {
         this.layers.showLoadingLayer();
     }
 
-    async run(bundleUrl: string): Promise<CommandInterface> {
+    async run(bundleUrl: string, optionalChangesUrl?: string): Promise<CommandInterface> {
         await this.stop();
+        const changesUrl = optionalChangesUrl || bundleUrl + ".changed";
         const emulatorsUi = this.emulatorsUi;
         if (this.emulatorFunction === "janus") {
             this.layers.setLoadingMessage("Connecting...");
             this.ciPromise = emulators[this.emulatorFunction](bundleUrl);
         } else {
             this.layers.setLoadingMessage("Downloading bundle...");
-            const bundle = await emulatorsUi.persist.load(bundleUrl, emulators)
-                .catch(() => emulatorsUi.network.resolveBundle(bundleUrl));
-            this.ciPromise = emulators[this.emulatorFunction](bundle);
+            const bundlePromise = emulatorsUi.network.resolveBundle(bundleUrl);
+            try {
+                const changesBundle = await emulatorsUi.persist.load(changesUrl, emulators)
+                    .catch(() => emulatorsUi.network.resolveBundle(changesUrl));
+                const bundle = await bundlePromise;
+                this.ciPromise = emulators[this.emulatorFunction]([bundle, changesBundle]);
+            } catch {
+                const bundle = await bundlePromise;
+                this.ciPromise = emulators[this.emulatorFunction]([bundle]);
+            }
         }
 
         let ci: CommandInterface;
@@ -64,7 +72,7 @@ export class DosInstance {
         if (this.emulatorFunction === "janus") {
             emulatorsUi.graphics.video(this.layers, ci);
         } else {
-            emulatorsUi.persist.save(bundleUrl, this.layers, ci, emulators);
+            emulatorsUi.persist.save(changesUrl, this.layers, ci, emulators);
             emulatorsUi.graphics.webGl(this.layers, ci);
             emulatorsUi.sound.audioNode(ci);
         }
