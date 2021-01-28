@@ -25,6 +25,7 @@ export class Layers {
     width: number;
     height: number;
     notyf = new Notyf();
+    toggleKeyboard: () => boolean = () => false;
 
     private clickToStart: HTMLDivElement;
     private loaderText: HTMLPreElement;

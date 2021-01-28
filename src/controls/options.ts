@@ -47,6 +47,8 @@ export function options(layers: Layers,
         } else  {
             keyboard.classList.remove("emulator-control-close-icon");
         }
+
+        return keyboardVisible;
     };
 
     const updateVisibility = () => {
@@ -137,7 +139,9 @@ export function options(layers: Layers,
 
     layers.mouseOverlay.appendChild(container);
     layers.mouseOverlay.appendChild(keyboardDiv);
+    layers.toggleKeyboard = toggleKeyboard;
     ci.events().onExit(() => {
+        layers.toggleKeyboard = () => false;
         layers.mouseOverlay.removeChild(container);
         layers.mouseOverlay.removeChild(keyboardDiv);
         layers.setOnFullscreen(() => {/**/});

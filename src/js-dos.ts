@@ -45,11 +45,13 @@ export class DosInstance {
             this.layers.setLoadingMessage("Connecting...");
             this.ciPromise = emulators[this.emulatorFunction](bundleUrl);
         } else {
-            this.layers.setLoadingMessage("Downloading bundle...");
-            const bundlePromise = emulatorsUi.network.resolveBundle(bundleUrl);
+            this.layers.setLoadingMessage("Downloading bundle ...");
+            const bundlePromise = emulatorsUi.network.resolveBundle(bundleUrl, {
+                onprogress: (percent) => this.layers.setLoadingMessage("Downloading bundle " + percent + "%"),
+            });
             try {
                 const changesBundle = await emulatorsUi.persist.load(changesUrl, emulators)
-                    .catch(() => emulatorsUi.network.resolveBundle(changesUrl));
+                    .catch(() => emulatorsUi.network.resolveBundle(changesUrl, { cache: null }));
                 const bundle = await bundlePromise;
                 this.ciPromise = emulators[this.emulatorFunction]([bundle, changesBundle]);
             } catch {
