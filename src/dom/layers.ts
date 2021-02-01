@@ -188,8 +188,8 @@ export class Layers {
         this.onFullscreenChanged = onFullscreenChanged;
     }
 
-    save() {
-        this.onSave()
+    save(): Promise<void> {
+        return this.onSave()
             .then(() => {
                 this.notyf.success("Saved");
             })
