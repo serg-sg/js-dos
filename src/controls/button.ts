@@ -81,6 +81,12 @@ export function createButton(symbol: string,
     for (const next of pointer.enders) {
         button.addEventListener(next, onEnd, options);
     }
+    for (const next of pointer.changers) {
+        button.addEventListener(next, onPrevent, options);
+    }
+    for (const next of pointer.leavers) {
+        button.addEventListener(next, onPrevent, options);
+    }
     for (const next of pointer.prevents) {
         button.addEventListener(next, onPrevent, options);
     }

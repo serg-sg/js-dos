@@ -8,6 +8,7 @@ function initBind() {
     const starters: string[] = [];
     const changers: string[] = [];
     const enders: string[] = [];
+    const leavers: string[] = [];
     const prevents: string[] = [];
 
     if (isPointer) {
@@ -15,6 +16,7 @@ function initBind() {
         enders.push("pointerup", "pointercancel");
         changers.push("pointermove");
         prevents.push("touchstart", "touchmove", "touchend");
+        leavers.push("pointerleave");
     } else if (isMSPointer) {
         starters.push("MSPointerDown");
         changers.push("MSPointerMove");
@@ -27,13 +29,15 @@ function initBind() {
         starters.push("mousedown");
         changers.push("mousemove");
         enders.push("mouseup");
+        leavers.push("mouseleave");
     }
 
     return {
         starters,
         changers,
         enders,
-        prevents
+        prevents,
+        leavers,
     };
 }
 

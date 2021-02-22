@@ -4,7 +4,9 @@ import { pointer, getPointerState } from "../controls/pointer";
 
 export function mouse(layers: Layers,
                       ci: CommandInterface) {
-    function mapXY(x: number, y: number) {
+    const insensitivePadding = 1 / 100;
+
+    function mapXY(eX: number, eY: number) {
         const frameWidth = ci.width();
         const frameHeight = ci.height();
         const containerWidth = layers.width;
@@ -23,9 +25,28 @@ export function mouse(layers: Layers,
         const top = (containerHeight - height) / 2;
         const left = (containerWidth - width) / 2;
 
+        let x = Math.max(0, Math.min(1, (eX - left) / width));
+        let y = Math.max(0, Math.min(1, (eY - top) / height));
+
+        if (x <= insensitivePadding) {
+            x = 0;
+        }
+
+        if (x >= (1 - insensitivePadding)) {
+            x = 1;
+        }
+
+        if (y <= insensitivePadding) {
+            y = 0;
+        }
+
+        if (y >= (1 - insensitivePadding)) {
+            y = 1;
+        }
+
         return {
-            x: Math.max(0, Math.min(1, (x - left) / width)),
-            y: Math.max(0, Math.min(1, (y - top) / height)),
+            x,
+            y,
         };
     }
 
@@ -45,6 +66,11 @@ export function mouse(layers: Layers,
         ci.sendMouseMotion(xy.x, xy.y);
     };
 
+    function onMouseLeave(x: number, y: number) {
+        const xy = mapXY(x, y);
+        ci.sendMouseMotion(xy.x, xy.y);
+    }
+
     const el = layers.mouseOverlay;
 
 
@@ -53,6 +79,10 @@ export function mouse(layers: Layers,
     };
 
     const onStart = (e: Event) => {
+        if (e.target !== el) {
+            return;
+        }
+
         const state = getPointerState(e, el);
         onMouseDown(state.x, state.y, state.button);
         e.stopPropagation();
@@ -60,6 +90,10 @@ export function mouse(layers: Layers,
     };
 
     const onChange = (e: Event) => {
+        if (e.target !== el) {
+            return;
+        }
+
         const state = getPointerState(e, el);
         onMouseMove(state.x, state.y);
         e.stopPropagation();
@@ -73,10 +107,22 @@ export function mouse(layers: Layers,
         preventDefaultIfNeeded(e);
     };
 
+    const onLeave = (e: Event) => {
+        if (e.target !== el) {
+            return;
+        }
+
+        const state = getPointerState(e, el);
+        onMouseLeave(state.x, state.y);
+        e.stopPropagation();
+        preventDefaultIfNeeded(e);
+    };
+
     const onPrevent = (e: Event) => {
         e.stopPropagation();
         preventDefaultIfNeeded(e);
     };
+
     const options = {
         capture: false,
     }
@@ -93,7 +139,9 @@ export function mouse(layers: Layers,
     for (const next of pointer.prevents) {
         el.addEventListener(next, onPrevent, options);
     }
-
+    for (const next of pointer.leavers) {
+        el.addEventListener(next, onLeave, options);
+    }
 
     const exitFn = () => {
         for (const next of pointer.starters) {
@@ -107,6 +155,9 @@ export function mouse(layers: Layers,
         }
         for (const next of pointer.prevents) {
             el.removeEventListener(next, onPrevent, options);
+        }
+        for (const next of pointer.leavers) {
+            el.removeEventListener(next, onLeave, options);
         }
     };
 
