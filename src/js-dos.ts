@@ -8,8 +8,6 @@ import { Build } from "./build";
 
 declare const emulators: Emulators;
 
-emulators.cacheSeed += " ui (" + Build.short + ")";
-
 export type EmulatorFunction = "dosWorker" | "dosDirect" | "janus";
 
 export interface DosOptions {
@@ -19,6 +17,8 @@ export interface DosOptions {
 }
 
 export class DosInstance {
+    static initialRun = true;
+
     emulatorsUi: EmulatorsUi;
     emulatorFunction: EmulatorFunction;
     layers: Layers;
@@ -30,6 +30,11 @@ export class DosInstance {
     private clickToStart: boolean;
 
     constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi, options: DosOptions) {
+        if (DosInstance.initialRun) {
+            emulators.cacheSeed += " ui (" + Build.short + ")";
+            DosInstance.initialRun = false; 
+        }
+
         this.emulatorsUi = emulatorsUi;
         this.emulatorFunction = options.emulatorFunction || "dosWorker";
         this.clickToStart = options.clickToStart || false;
