@@ -55,8 +55,7 @@ export class DosInstance {
                 onprogress: (percent) => this.layers.setLoadingMessage("Downloading bundle " + percent + "%"),
             });
             try {
-                const changesBundle = await emulatorsUi.persist.load(changesUrl, emulators)
-                    .catch(() => emulatorsUi.network.resolveBundle(changesUrl, { cache: null }));
+                const changesBundle = await emulatorsUi.persist.load(changesUrl, emulators);
                 const bundle = await bundlePromise;
                 this.ciPromise = emulators[this.emulatorFunction]([bundle, changesBundle]);
             } catch {
